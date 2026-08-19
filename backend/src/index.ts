@@ -1,13 +1,22 @@
+/* بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيْمِ ﷺ InshaAllah */
+
 import express, { Request, Response } from "express";
+import { PORT } from "./config/env";
+import { db_pool } from "./config/db";
+import { mailer } from "./config/mailer";
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+
 
 app.use(express.json());
+// let query =`ALTER TABLE User
+// ADD religion Varchar(255);` 
+// let data =db_pool.query(query, function (error , rasults , fields) {
+//   console.log({error});
+//   console.log({rasults});
+//   console.log({fields});
+// })
 
-app.get("/", (req: Request, res: Response) => {
-  res.json({ message: "Hello from Express + TypeScript!" });
-});
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
