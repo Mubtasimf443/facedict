@@ -11,3 +11,4 @@ export const MYSQL_DB_PORT = process.env.MYSQL_DB_PORT;
 export const MYSQL_DB_PASSWORD = process.env.MYSQL_DB_PASSWORD;
 export const SMTP_USER = process.env.SMTP_USER;
 export const SMTP_PASS = process.env.SMTP_PASS;
+export const REDIS_URL = process.env.REDIS_URL;

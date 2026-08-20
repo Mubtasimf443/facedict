@@ -9,14 +9,12 @@ const app = express();
 
 
 app.use(express.json());
-// let query =`ALTER TABLE User
-// ADD religion Varchar(255);` 
-// let data =db_pool.query(query, function (error , rasults , fields) {
-//   console.log({error});
-//   console.log({rasults});
-//   console.log({fields});
-// })
-
+let query =`CREATE TABLE IF NOT EXISTS User;` 
+let data =db_pool.query(query, function (error , rasults , fields) {
+  console.log({error});
+  console.log({rasults});
+  console.log({fields});
+})
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);

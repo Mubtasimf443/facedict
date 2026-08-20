@@ -2,8 +2,15 @@
 
 import z from "zod";
 import { hobbies, industryTypes, interest, languages, nationalities, religions } from "../types/auth.types";
+import crypto from 'crypto'
 
 export default class AuthService {
+    static hashPassword(password:string) {
+        let salt = crypto.randomBytes(16).toString('hex');
+        let hashed_password = crypto.scryptSync(password,salt,64);
+
+        return {hashed_password ,  salt };
+    }
     static validateSignUpData(user :any) {
         const EducationEntrySchema = z.object({
             institution: z.string(),
@@ -40,13 +47,13 @@ export default class AuthService {
             religion :z.enum(religions),
             nationality: z.enum(nationalities),
 
-            languages:z.array(z.enum(languages)) ,
+            // languages:z.array(z.enum(languages)) ,
 
             age: z.number().gte(16).lte(120).int().nonnegative(),
 
             gender: z.enum(["male", "female", "other"]).optional(),
 
-            bio: z.string().max(120).optional(),
+            // bio: z.string().max(120).optional(),
 
             // avatar: z.string().url().optional(),
             // coverImage: z.string().url().optional(),
@@ -71,5 +78,8 @@ export default class AuthService {
         })
 
         return UserSchema.safeParse(user)
+    }
+    static generate_auth_session() {
+        return crypto.randomBytes(80).toString('hex').normalize()
     }
 }

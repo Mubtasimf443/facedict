@@ -2,27 +2,22 @@
 
 import { Request, Response } from "express";
 import AuthService from "../services/auth.service";
+import crypto from 'crypto'
+import { redisClient } from "../config/radis";
+import generateOtp from "../utils/core/GenerateOtp";
+import z, { success } from "zod";
+import sendVerificationOTP from "../utils/mails/auth.mails";
 
 export default class AuthController {
-    static SignUp(req: Request, res: Response): Response {
-        try {
-            let { data, success, error } = AuthService.validateSignUpData(req.body);
+    // static async SignUp(req: Request, res: Response): Promise<Response> {
+     
+    // }
 
-            if (error) {
-                return res.status(400).json({ 
-                    success :false ,
-                    error,
-                    data : null
-                })
-            }
+    // static async SignUpOtpVerification(req : Request , res : Response) :Promise<Response> {
+     
+    // }
 
-            
-            return res.status(200).json({})
-        } catch (error) {
-            console.log(error);
-            return res.status(200).json({ success: false, error: error, data : null })
-        }
-    }
+    
     static Login(req: Request, res: Response): Response {
         return res.status(200).json({});
     }
