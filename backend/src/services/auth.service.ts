@@ -1,6 +1,6 @@
 /* بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيْمِ ﷺ InshaAllah */
 
-import z, { email } from "zod";
+import z from "zod";
 import { countries, hobbies, industryTypes, interest, languages, nationalities, religions } from "../types/auth.types";
 import crypto from 'crypto'
 

@@ -14,3 +14,6 @@ export const SMTP_USER = process.env.SMTP_USER;
 export const SMTP_PASS = process.env.SMTP_PASS;
 export const REDIS_URL = process.env.REDIS_URL;
 export const REDIS_HOST = process.env.REDIS_HOST;
+export const CLOUDINARY_CLOUD = process.env.CLOUDINARY_CLOUD;
+export const CLOUDINARY_API_KEY = process.env.CLOUDINARY_API_KEY;
+export const CLOUDINARY_API_SECRET = process.env.CLOUDINARY_API_SECRET;
