@@ -1,13 +1,16 @@
 /* بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيْمِ ﷺ InshaAllah */
 
-import z from "zod";
-import { hobbies, industryTypes, interest, languages, nationalities, religions } from "../types/auth.types";
+import z, { email } from "zod";
+import { countries, hobbies, industryTypes, interest, languages, nationalities, religions } from "../types/auth.types";
 import crypto from 'crypto'
 
 export default class AuthService {
+    static comparePassword(password: string, hashPassword: string, salt: string) {
+        return crypto.scryptSync(password, salt, 64).toString('hex').normalize() === hashPassword;
+    }
     static hashPassword(password:string) {
         let salt = crypto.randomBytes(16).toString('hex');
-        let hashed_password = crypto.scryptSync(password,salt,64);
+        let hashed_password = crypto.scryptSync(password,salt,64).toString('hex').normalize();
 
         return {hashed_password ,  salt };
     }
@@ -19,15 +22,11 @@ export default class AuthService {
             endYear: z.number().int().optional(),
         });
 
-        const AddressSchema = z.object({
-            street: z.string().optional(),
-            city: z.string().optional(),
-            state: z.string().optional(),
-            postalCode: z.string().optional(),
-            country: z.string().optional(),
-        });
 
         const LocationSchema = z.object({
+            city : z.string().optional(),
+        
+            country : z.enum(countries).optional(),
             latitude: z.number().optional(),
             longitude: z.number().optional(),
         });
@@ -41,34 +40,21 @@ export default class AuthService {
         });
 
         const UserSchema = z.object({
-
             name: z.string().max(50).min(4),
             email: z.string().email(),
             religion :z.enum(religions),
             nationality: z.enum(nationalities),
 
-            // languages:z.array(z.enum(languages)) ,
+            languages: z.array( z.enum(languages) ),
 
             age: z.number().gte(16).lte(120).int().nonnegative(),
 
             gender: z.enum(["male", "female", "other"]).optional(),
 
-            // bio: z.string().max(120).optional(),
+        
+            hobbies: z.array( z.enum(hobbies)).nonempty(),
 
-            // avatar: z.string().url().optional(),
-            // coverImage: z.string().url().optional(),
-
-            // education: z.array(EducationEntrySchema).optional(),
-
-            // living_Address: AddressSchema.optional(),
-
-            // current_location: LocationSchema.optional(),
-
-            // current_job: JobSchema.optional(),
-
-            hobbies: z.array(z.enum(hobbies)),
-
-            interest: z.array(z.enum(interest)),
+            interest: z.array(z.enum(interest)).nonempty(),
 
             hashed_password: z.string(),
             salt: z.string(),
@@ -81,5 +67,13 @@ export default class AuthService {
     }
     static generate_auth_session() {
         return crypto.randomBytes(80).toString('hex').normalize()
+    }
+
+    static validateLoginInfo(data : any) {
+        let schema = z.object({
+            email : z.string().email().max(255).min(5),
+            password : z.string().max(255)
+        })
+        return schema.parse(data)
     }
 }
