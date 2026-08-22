@@ -7,6 +7,7 @@ import path from 'path'
 import { fileURLToPath } from 'url';
 import { success } from "zod";
 import uploadImageToCloudinary from "../config/cloudinary";
+import { unlink, unlinkSync } from "fs";
 
 
 export default class AssetsController {
@@ -50,6 +51,7 @@ export default class AssetsController {
                             data : null
                         })
                     }
+                    unlinkSync(files.image[0].filepath)
                     return res.status(200).json({ data: { url: response.url }, success: true, error: null })
                     
                 } catch (error) {

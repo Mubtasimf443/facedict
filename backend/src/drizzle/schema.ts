@@ -1,6 +1,9 @@
 /* بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيْمِ ﷺ InshaAllah */
 
+import { timestamp } from "drizzle-orm/mysql-core";
+import { date } from "drizzle-orm/mysql-core";
 import { mysqlTable, boolean , json, varchar , text, int } from "drizzle-orm/mysql-core";
+import { hobbies } from "../types/auth.types";
 
 export const usersTable = mysqlTable("usersTable", {
     id: int('id').primaryKey().autoincrement().unique(),
@@ -38,5 +41,18 @@ export const usersTable = mysqlTable("usersTable", {
         startDate: number,
         endDate: number,
     }[]>(),
+    createdAt : timestamp('createdAt').defaultNow().notNull()
+});
 
-})
+export const postTables = mysqlTable('postTable', {
+    id : int('id').primaryKey().autoincrement().unique(),
+    caption : text('caption').notNull(),
+    images : json('images').$type<{url : string}[]>(),
+    createdAt : timestamp('createdAt').defaultNow().notNull(),
+    likes : json('likes').$type<{ 
+        userId : number ,
+        time : Date
+    }[]>(),
+    tags : json('tags').$type<string[]>(),
+    interest : json('interest').$type<string[]>(),
+});
