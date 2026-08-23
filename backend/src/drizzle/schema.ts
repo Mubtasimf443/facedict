@@ -64,6 +64,7 @@ export const postTables = mysqlTable('postTable', {
 
 
 export const friendshipRequestTable = mysqlTable('friendshipRequest', {
+    id : int('id').primaryKey().autoincrement().notNull(),
     from: int('from').notNull().references(() => usersTable.id, { onDelete: 'cascade' }),
     to: int('to').notNull().references(() => usersTable.id, { onDelete: 'cascade' }),
     status : mysqlEnum('status', ['confirmed', 'pending', 'declined']).default('pending').notNull(),
