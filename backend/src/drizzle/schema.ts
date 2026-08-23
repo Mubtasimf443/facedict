@@ -4,6 +4,8 @@ import { timestamp } from "drizzle-orm/mysql-core";
 import { date } from "drizzle-orm/mysql-core";
 import { mysqlTable, boolean , json, varchar , text, int } from "drizzle-orm/mysql-core";
 import { hobbies } from "../types/auth.types";
+import { mysqlEnum } from "drizzle-orm/mysql-core";
+import { uniqueIndex } from "drizzle-orm/mysql-core";
 
 export const usersTable = mysqlTable("usersTable", {
     id: int('id').primaryKey().autoincrement().unique(),
@@ -20,7 +22,6 @@ export const usersTable = mysqlTable("usersTable", {
     hashed_password: text('hashed_password').notNull(),
     salt: text('salt').notNull(),
     languages: json('languages').$type<string[]>(),
-    hobbies: json('hobbies').$type<string[]>(),
     interest: json('interest').$type<string[]>(),
     location: json('location').$type<{
         city: string;
@@ -41,7 +42,11 @@ export const usersTable = mysqlTable("usersTable", {
         startDate: number,
         endDate: number,
     }[]>(),
-    createdAt : timestamp('createdAt').defaultNow().notNull()
+    createdAt : timestamp('createdAt').defaultNow().notNull(),
+    friends : json('friends').$type<number[]>().default([]),
+    following : json('following').$type<number[]>().default([]),
+    followers : json('followers').$type<number[]>().default([]),
+    
 });
 
 export const postTables = mysqlTable('postTable', {
@@ -56,3 +61,13 @@ export const postTables = mysqlTable('postTable', {
     tags : json('tags').$type<string[]>(),
     interest : json('interest').$type<string[]>(),
 });
+
+
+export const friendshipRequestTable = mysqlTable('friendshipRequest', {
+    from: int('from').notNull().references(() => usersTable.id, { onDelete: 'cascade' }),
+    to: int('to').notNull().references(() => usersTable.id, { onDelete: 'cascade' }),
+    status : mysqlEnum('status', ['confirmed', 'pending', 'declined']).default('pending').notNull(),
+    createdAt : timestamp('createdAt').defaultNow().notNull()
+},(table) => ({
+    uniquePair: uniqueIndex('unique_from_to').on(table.from, table.to),
+}))

@@ -51,9 +51,6 @@ export default class AuthService {
 
             gender: z.enum(["male", "female", "other"]).optional(),
 
-        
-            hobbies: z.array( z.enum(hobbies)).nonempty(),
-
             interest: z.array(z.enum(interest)).nonempty(),
 
             hashed_password: z.string(),
