@@ -1,7 +1,7 @@
 /* بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيْمِ ﷺ InshaAllah */
 
 import z from "zod";
-import { countries, hobbies, industryTypes, interest, languages, nationalities, religions } from "../types/auth.types";
+import { countries, industryTypes, interest, languages, nationalities, religions } from "../types/auth.types";
 import crypto from 'crypto'
 
 export default class AuthService {

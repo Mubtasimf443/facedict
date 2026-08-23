@@ -3,7 +3,6 @@
 import { timestamp } from "drizzle-orm/mysql-core";
 import { date } from "drizzle-orm/mysql-core";
 import { mysqlTable, boolean , json, varchar , text, int } from "drizzle-orm/mysql-core";
-import { hobbies } from "../types/auth.types";
 import { mysqlEnum } from "drizzle-orm/mysql-core";
 import { uniqueIndex } from "drizzle-orm/mysql-core";
 
@@ -49,19 +48,6 @@ export const usersTable = mysqlTable("usersTable", {
     
 });
 
-export const postTables = mysqlTable('postTable', {
-    id : int('id').primaryKey().autoincrement().unique(),
-    caption : text('caption').notNull(),
-    images : json('images').$type<{url : string}[]>(),
-    createdAt : timestamp('createdAt').defaultNow().notNull(),
-    likes : json('likes').$type<{ 
-        userId : number ,
-        time : Date
-    }[]>(),
-    tags : json('tags').$type<string[]>(),
-    interest : json('interest').$type<string[]>(),
-});
-
 
 export const friendshipRequestTable = mysqlTable('friendshipRequest', {
     id : int('id').primaryKey().autoincrement().notNull(),
@@ -71,4 +57,19 @@ export const friendshipRequestTable = mysqlTable('friendshipRequest', {
     createdAt : timestamp('createdAt').defaultNow().notNull()
 },(table) => ({
     uniquePair: uniqueIndex('unique_from_to').on(table.from, table.to),
-}))
+}));
+
+
+export const postTables = mysqlTable('postTable', {
+    id: int('id').primaryKey().autoincrement().unique().notNull(),
+    caption: text('caption').notNull(),
+    images: json('images').$type<string[]>(),
+    createdAt: timestamp('createdAt').defaultNow().notNull(),
+    likes: json('likes').$type<{
+        userId: number,
+        time: Date
+    }[]>()
+        .default([]),
+    tags: json('tags').$type<string[]>(),
+    interest: json('interest').$type<string[]>(),
+});

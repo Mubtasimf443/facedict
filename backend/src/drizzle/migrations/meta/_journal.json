@@ -15,6 +15,13 @@
       "when": 1787413550994,
       "tag": "0001_talented_luckman",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1787477415165,
+      "tag": "0002_soft_dark_beast",
+      "breakpoints": true
     }
   ]
 }
