@@ -2,13 +2,11 @@
 
 import { Request, Response } from "express";
 import AuthService from "../services/auth.service";
-import crypto from 'crypto'
 import { redisClient } from "../config/radis";
 import generateOtp from "../utils/core/GenerateOtp";
-import z, { success, ZodError } from "zod";
+import z, { ZodError } from "zod";
 import sendVerificationOTP from "../utils/mails/auth.mails";
-import { error, log } from "console";
-import { AsyncLocalStorage } from "async_hooks";
+import { log } from "console";
 import db from "../config/db";
 import { usersTable } from "../drizzle/schema";
 import { eq } from "drizzle-orm";
@@ -80,6 +78,7 @@ export default class AuthController {
     
     static async Login(req: Request, res: Response): Promise<Response> {
         try {
+           
             let data = AuthService.validateLoginInfo(req.body);
             let user =await db.select().from(usersTable).where(eq(usersTable.email , data.email));
             if (user.length !== 1) {
@@ -95,6 +94,8 @@ export default class AuthController {
                     }
                 })
             }
+
+            
             let login_session = AuthService.generate_auth_session();
             redisClient.set(`login_session:${login_session}`, JSON.stringify({ id: user[0].id }), 'EX', 7 * 24 * 60 * 60);
             return res
@@ -153,7 +154,7 @@ export default class AuthController {
                 success : true,
                 data : { user : user[0] },
                 error : null
-            })
+            });
         } catch (error) {
             console.error(error);
             return res.status(500).json({ error })

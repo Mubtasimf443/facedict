@@ -69,7 +69,7 @@ export default class AuthService {
     static validateLoginInfo(data : any) {
         let schema = z.object({
             email : z.string().email().max(255).min(5),
-            password : z.string().max(255)
+            password : z.string().max(30)
         })
         return schema.parse(data)
     }

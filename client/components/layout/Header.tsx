@@ -1,13 +1,24 @@
 /* بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيْمِ ﷺ InshaAllah */
-
-import React, { useState } from 'react'
+"use client"
+import React, { useEffect, useState } from 'react'
 import BrandLogo from '../ui/BrandLogo'
 import Link from 'next/link'
 import { Search } from 'lucide-react'
 import Image from 'next/image';
 
 export default function Header() {
-  let [profileImage, setProfileImage ]=useState('');
+  let [profileImage, setProfileImage ]=useState<string>('');
+
+  useEffect(() => {
+    async function func() {
+      let response = await fetch(process.env.NEXT_PUBLIC_SERVER_URL!+ '/api/auth/user-details');
+      if (response.status ===200) {        
+        let {avater} = await response.json();
+        setProfileImage(avater)
+      }
+    }
+    func();
+  }, [])
   return (
     <header className='flex flex-row justify-between items-center'>
       <BrandLogo />
@@ -15,7 +26,7 @@ export default function Header() {
         <Search />
         <input type="text" />
       </div>
-      <Image src={profileImage} alt='profile Image' className=' rounder-full'/>
+      <Image width={50} height={50} src={profileImage} alt='profile Image' sizes='50' className=' rounder-full'/>
     </header>
   )
 }

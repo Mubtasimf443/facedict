@@ -17,15 +17,12 @@ export default async function userMiddleWare(req : Request , res : Response, nex
     try {
         let bearerAccessToken = req.cookies.login_session;
         if (!bearerAccessToken) return res.status(401).json({ error: { message: 'Bearer Access Token is required' } });
-        if (bearerAccessToken.startsWith('bearer') === false) return res.status(401).json({ error: { message: 'Bearer Access Token is required' } });
-        let token = bearerAccessToken.replace('bearer', '').trim();
-        if (!token) return res.status(401).json({ error: { message: 'Bearer Access Token is required' } });
 
         const authSessionSchema = z
             .string()
             .length(160, { message: 'Auth session token must be exactly 160 characters long' })
             .regex(/^[0-9a-f]{160}$/, { message: 'Auth session token must be a valid hex string' });
-        let user = await redisClient.get(`login_session:${authSessionSchema.parse(token)}`)
+        let user = await redisClient.get(`login_session:${authSessionSchema.parse(bearerAccessToken)}`)
         if (user === null) {
             res.status(401).json({ error : { message : 'User is logged Out'}})
         }

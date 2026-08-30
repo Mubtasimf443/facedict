@@ -2,14 +2,16 @@
 
 import express from 'express';
 import AuthController from '../controllers/auth.controller';
+import userMiddleWare from '../middlewares/userMiddleWare';
 
 
 const router = express.Router();
+
 
 router.post('/sign-up', AuthController.SignUp);
 router.post('/sign-up-verification', AuthController.SignUpOtpVerification);
 router.post('/login', AuthController.Login);
 router.post('/logout',AuthController.Logout );
-router.get('/user-details', AuthController.userDetails)
+router.get('/user-details', userMiddleWare, AuthController.userDetails)
 
 export default router;
