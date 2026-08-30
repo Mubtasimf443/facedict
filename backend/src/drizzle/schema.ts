@@ -18,6 +18,7 @@ export const usersTable = mysqlTable("usersTable", {
     religion: varchar('religion', { length: 100 }).notNull(),
     bio: varchar('bio', { length: 120 }),
     avatar: varchar('avatar', { length: 255 }),
+    coverImage: varchar('coverImage', { length : 255 }),
     hashed_password: text('hashed_password').notNull(),
     salt: text('salt').notNull(),
     languages: json('languages').$type<string[]>(),

@@ -7,7 +7,7 @@ import { redisClient } from "../config/radis";
 import generateOtp from "../utils/core/GenerateOtp";
 import z, { success, ZodError } from "zod";
 import sendVerificationOTP from "../utils/mails/auth.mails";
-import { log } from "console";
+import { error, log } from "console";
 import { AsyncLocalStorage } from "async_hooks";
 import db from "../config/db";
 import { usersTable } from "../drizzle/schema";
@@ -63,7 +63,14 @@ export default class AuthController {
 
             let login_session = AuthService.generate_auth_session();
             redisClient.set(`login_session:${login_session}`, JSON.stringify({ id: user[0].id }), 'EX', 7 * 24 * 60 * 60);
-            return res.status(200).json({ success: true, data: { login_session }, error: null });
+            return res
+                .status(200)
+                .cookie('login_session', login_session, {
+                    httpOnly: true,
+                    sameSite: 'lax',
+                    maxAge: 7 * 24 * 60 * 60 * 1000
+                })
+                .json({ success : true, error : null });
         } catch (error) {
             console.error(error);
             return res.status(500).json({ success : false , data : null , error })
@@ -90,7 +97,14 @@ export default class AuthController {
             }
             let login_session = AuthService.generate_auth_session();
             redisClient.set(`login_session:${login_session}`, JSON.stringify({ id: user[0].id }), 'EX', 7 * 24 * 60 * 60);
-            return res.status(200).json({ success: true, data: { login_session }, error: null });
+            return res
+                .status(200)
+                .cookie('login_session', login_session, {
+                    httpOnly: true,
+                    sameSite: 'lax',
+                    maxAge: 7 * 24 * 60 * 60 * 1000
+                })
+                .json({ success : true, error : null })
         } catch (error) {
             if (error instanceof ZodError) {
                 return res.status(400).json({ error, data: null, success: false })
@@ -108,10 +122,41 @@ export default class AuthController {
                 .length(160, { message: 'Auth session token must be exactly 160 characters long' })
                 .regex(/^[0-9a-f]{160}$/, { message: 'Auth session token must be a valid hex string' });
             await redisClient.del(`login_session:${authSessionSchema.parse(req.body.session)}`)
-            return res.status(200).json({ success: true, data: null, error: null })
+            return res
+                .status(200)
+                .clearCookie('login_session', {
+                    httpOnly : true,
+                    sameSite : 'lax'
+                })
+                .json({ success: true, data: null, error: null })
         } catch (error) {
             console.error({error})
             return res.status(500).json({error})
+        }
+    }
+
+    static async userDetails(req: Request, res: Response) {
+        try {
+            let user = await db
+                .select({
+                    name: usersTable.name,
+                    email: usersTable.email,
+                    avater: usersTable.avatar,
+                    coverImage: usersTable.coverImage,
+                    bio: usersTable.bio,
+                })
+                .from(usersTable)
+                .where(eq(usersTable.id, req.user_id!))
+                .limit(1);
+            if (user.length === 0) return res.status(404).json({ error: { message: 'No User found from this account' } })
+            return res.status(200).json({
+                success : true,
+                data : { user : user[0] },
+                error : null
+            })
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({ error })
         }
     }
 }

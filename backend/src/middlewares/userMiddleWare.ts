@@ -15,7 +15,7 @@ declare global {
 
 export default async function userMiddleWare(req : Request , res : Response, next: NextFunction) {
     try {
-        let bearerAccessToken = req.headers['authorization'];
+        let bearerAccessToken = req.cookies.login_session;
         if (!bearerAccessToken) return res.status(401).json({ error: { message: 'Bearer Access Token is required' } });
         if (bearerAccessToken.startsWith('bearer') === false) return res.status(401).json({ error: { message: 'Bearer Access Token is required' } });
         let token = bearerAccessToken.replace('bearer', '').trim();

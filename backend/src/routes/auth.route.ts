@@ -10,5 +10,6 @@ router.post('/sign-up', AuthController.SignUp);
 router.post('/sign-up-verification', AuthController.SignUpOtpVerification);
 router.post('/login', AuthController.Login);
 router.post('/logout',AuthController.Logout );
+router.get('/user-details', AuthController.userDetails)
 
 export default router;

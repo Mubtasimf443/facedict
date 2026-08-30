@@ -1,0 +1,1 @@
+ALTER TABLE `usersTable` ADD `coverImage` varchar(255);
