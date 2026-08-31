@@ -18,6 +18,8 @@ app.use(
     credentials: true,
   })
 );
+// console.log(db.delete(usersTable).then(data => console.log(data)));
+
 app.use(morgan('dev'));
 app.use(express.json());
 app.use(cookieParser())

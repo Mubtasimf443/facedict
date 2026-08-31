@@ -7,20 +7,21 @@ import { useRouter } from 'next/navigation';
 import { SubmitEvent, useState } from 'react'
 
 export default function Login() {
-   let router = useRouter();
+  let router = useRouter();
   let [email, setEmail] = useState('');
   let [password, setpassword] = useState('');
-  let [isSubmitingForm, setIsSubmitingForm]= useState<boolean>(false);
-  async function HandleFormSubmit(event : SubmitEvent<HTMLFormElement>) {
+  let [isSubmitingForm, setIsSubmitingForm] = useState<boolean>(false);
+
+  async function HandleFormSubmit(event: SubmitEvent<HTMLFormElement>) {
     try {
       event.preventDefault();
       setIsSubmitingForm(true);
       let response = await fetch(process.env.NEXT_PUBLIC_SERVER_URL! + '/api/auth/login', {
-        method : 'POST',
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        credentials :'include',
-        body : JSON.stringify({ email , password }),
-        cache :'no-cache'
+        credentials: 'include',
+        body: JSON.stringify({ email, password }),
+        cache: 'no-cache'
       });
       if (response.status === 200) {
         router.push('/feed');
@@ -35,8 +36,8 @@ export default function Login() {
     } catch (error) {
       console.error(error);
       toast.add({
-        title : 'Failed to login',
-        description : 'Because of an unknown error the login has failed'
+        title: 'Failed to login',
+        description: 'Because of an unknown error the login has failed'
       })
     } finally {
       setIsSubmitingForm(false)
@@ -44,15 +45,17 @@ export default function Login() {
   }
 
   return (
-
-    <div className='flex flex-col justify-center items-center min-h-dvh w-full py-10'>
-      <h2 className="text-3xl font-semibold py-5">Please Login</h2>
-      <form onSubmit={(event ) => HandleFormSubmit(event)} className='flex flex-col justify-start items-center shadow-md py-10 px-10 w-md min-h-fit border-2 border-[#1c409571] rounded-lg'>
-        <BrandLogo width={150} height={150} />
-        <div className="flex flex-col justify-start items-center w-full gap-y-2 mb-2">
-          <label htmlFor="email-input" className='w-full font-medium text-lg'>Email</label>
+    <div className='flex flex-col justify-center items-center min-h-dvh w-full px-4 py-6 sm:py-10'>
+      <h2 className="text-2xl sm:text-3xl font-semibold py-3 sm:py-5 text-center">Please Login</h2>
+      <form
+        onSubmit={(event) => HandleFormSubmit(event)}
+        className='flex flex-col justify-start items-center shadow-md py-6 px-6 sm:py-10 sm:px-10 w-full max-w-md min-h-fit border-2 border-[#1c409571] rounded-lg'
+      >
+        <BrandLogo width={120} height={120} />
+        <div className="flex flex-col justify-start items-center w-full gap-y-2 mb-2 mt-2">
+          <label htmlFor="email-input" className='w-full font-medium text-base sm:text-lg'>Email</label>
           <input
-            className='w-full rounded-md border-1 border-[#1c409571] p-3 outline-none bg-[#1c409513]'
+            className='w-full rounded-md border-1 border-[#1c409571] p-2.5 sm:p-3 text-base outline-none bg-[#1c409513]'
             name='email'
             type="email"
             id="email-input"
@@ -64,23 +67,32 @@ export default function Login() {
             required
           />
         </div>
-         <div className="flex flex-col justify-start items-center w-full gap-y-2 mb-2">
-          <label htmlFor="password-input" className='w-full font-medium text-lg'>Password</label>
+        <div className="flex flex-col justify-start items-center w-full gap-y-2 mb-2">
+          <label htmlFor="password-input" className='w-full font-medium text-base sm:text-lg'>Password</label>
           <input
-            className='w-full rounded-md border-1 border-[#1c409571] p-3 outline-none bg-[#1c409513]'
+            className='w-full rounded-md border-1 border-[#1c409571] p-2.5 sm:p-3 text-base outline-none bg-[#1c409513]'
             name='password'
             type="password"
             id="password-input"
             minLength={7}
             maxLength={255}
             autoComplete={'off'}
-             value={password}
+            value={password}
             onChange={event => setpassword(event.target.value)}
             required
           />
         </div>
-        <button type="submit" className='w-full bg-[#1c4095] cursor-pointer disabled:opacity-50 text-white p-2 text-lg rounded-sm my-2' disabled={isSubmitingForm}>Login</button>
-        <span className="text-sm text-gray-700 py-2">Don't Have a Account <Link className=' text-[#1c4095]' href={'/sign-up'} >Sign Up</Link></span>
+        <button
+          type="submit"
+          className='w-full bg-[#1c4095] cursor-pointer disabled:opacity-50 text-white p-2.5 sm:p-2 text-base sm:text-lg rounded-sm my-2'
+          disabled={isSubmitingForm}
+        >
+          Login
+        </button>
+        <span className="text-sm text-gray-700 py-2 text-center">
+          Don't Have a Account{' '}
+          <Link className='text-[#1c4095]' href={'/sign-up'}>Sign Up</Link>
+        </span>
       </form>
     </div>
   )
