@@ -14,7 +14,7 @@ const Friends = ({ userName, userImageSrc, userImageAlt }: { userName :string, u
                 </Avatar>
                 <span>{userName}</span>
             </div>
-            <button className='text-white bg-[#1c4095] cursor-pointer rounded-md px-3 text-sm'>Send Friend Request</button>
+            <button className='text-white bg-[#1c4095] cursor-pointer rounded-md px-3 text-sm'>Add Friend</button>
         </div>
 
     )
