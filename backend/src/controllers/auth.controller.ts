@@ -154,6 +154,7 @@ export default class AuthController {
         try {
             let user = await db
                 .select({
+                    id :usersTable.id,
                     name: usersTable.name,
                     email: usersTable.email,
                     avater: usersTable.avatar,

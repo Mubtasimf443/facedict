@@ -17,6 +17,8 @@ export const usersTable = mysqlTable("usersTable", {
     is_active: boolean('is_active').default(true),
     religion: varchar('religion', { length: 100 }).notNull(),
     bio: varchar('bio', { length: 120 }),
+    about:text('about'),
+    website : text('website'),
     avatar: varchar('avatar', { length: 255 }),
     coverImage: varchar('coverImage', { length : 255 }),
     hashed_password: text('hashed_password').notNull(),
@@ -39,8 +41,16 @@ export const usersTable = mysqlTable("usersTable", {
         title: string;
         industry_type: string;
         company: string;
-        startDate: number,
-        endDate: number,
+        startDate: {
+            day : number;
+            month: number;
+            year : number;
+        },
+        endDate: {
+            day : number;
+            month: number;
+            year : number;
+        },
     }[]>(),
     createdAt : timestamp('createdAt').defaultNow().notNull(),
     friends : json('friends').$type<number[]>().default([]),
@@ -73,4 +83,5 @@ export const postTables = mysqlTable('postTable', {
         .default([]),
     tags: json('tags').$type<string[]>(),
     interest: json('interest').$type<string[]>(),
+    author: int('author').notNull().references(() => usersTable.id, { onDelete: 'cascade' })
 });

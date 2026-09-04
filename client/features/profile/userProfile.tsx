@@ -128,7 +128,7 @@ export default function UserProfilePage({ user }: UserProfilePageProps) {
 
 
                 <div className="w-full mt-5">
-                    <Tabs defaultValue="media" className={'max-lg:px-3'}>
+                    <Tabs defaultValue="about" className={'max-lg:px-3'}>
                         <TabsList>
                             <TabsTrigger value="about">About</TabsTrigger>
                             <TabsTrigger value="posts">Posts</TabsTrigger>
@@ -211,14 +211,12 @@ export default function UserProfilePage({ user }: UserProfilePageProps) {
                                         </div>
                                         <div className="flex flex-col jusity-start items-start w-full gap-y-1">
                                             <h3 className="text-md font-medium">About</h3>
-                                            <p className="text-sm text-gray-700">
+                                            <p className="text-sm text-gray-700 text-justify">
                                                 Lorem ipsum dolor sit amet consectetur adipisicing elit. Beatae sapiente qui soluta dolorem, labore accusantium? Saepe quis velit nihil impedit porro blanditiis? Maiores ut cumque, voluptate iusto quibusdam pariatur tenetur doloribus unde in! Vero ipsam nisi voluptas vel libero quidem quos, rem, id maxime sed voluptate veniam deleniti possimus cupiditate reiciendis exercitationem. Atque neque deleniti vero ipsa maxime minima consequuntur nesciunt. Consectetur, molestiae cum. Dicta ipsam alias culpa, commodi quis beatae ipsa? Magnam iusto tempora cumque itaque cupiditate natus officiis sunt fuga illo reiciendis repellat a esse molestiae corporis expedita, placeat, quae eaque earum facere laborum! Modi explicabo iure velit veritatis nihil perspiciatis optio repellendus impedit quis, deleniti doloremque, magni perferendis unde temporibus nulla voluptatibus pariatur blanditiis. Animi praesentium corporis, nam unde inventore rem officia voluptatum excepturi iusto quidem voluptate, ab temporibus quia atque deleniti tempore ipsa laudantium doloribus quaerat odit libero culpa. Sapiente sint deleniti voluptas exercitationem iste. Dicta eveniet dolorum dignissimos alias eius earum at quia saepe quo itaque doloremque cumque dolores voluptatibus impedit voluptas exercitationem neque, repudiandae maxime dolorem, rem vel atque? Porro, maiores eos eveniet dignissimos exercitationem repellendus repellat officiis nemo possimus et amet explicabo error odit neque laboriosam molestiae, vitae nam dolorem laudantium dolores? Cumque?
                                             </p>
                                         </div>
                                     </CardContent>
-                                    <CardFooter>
-                                        <CardAction className="bg-[#1c4095] text-white text-sm font-medium px-3 py-1 cursor-pointer rounded-md"> Edit Info</CardAction>
-                                    </CardFooter>
+                                   
                                 </Card>
                             </div>
                         </TabsContent>

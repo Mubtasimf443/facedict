@@ -30,7 +30,7 @@ export default async function userMiddleWare(req : Request , res : Response, nex
         return next();
     } catch (error) {
         console.error('user middleware error \n', error);
-        res.status(500).json({
+        res.status(401).json({
             errorType: 'user middleware error',
             error,
             data: null,

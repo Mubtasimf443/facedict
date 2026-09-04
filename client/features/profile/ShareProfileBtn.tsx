@@ -9,7 +9,7 @@ export default function ShareProfileBtn() {
         toast.add({ title: 'Profile Url Coppied' })
     }
     return (
-        <Button className="rounded-full" onClick={onShareProfile}>Share profile</Button>
+        <Button className="rounded-full" onClick={onShareProfile}>Share Profile</Button>
 
     )
 }

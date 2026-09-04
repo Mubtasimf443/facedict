@@ -18,7 +18,7 @@ app.use(
     credentials: true,
   })
 );
-// console.log(db.delete(usersTable).then(data => console.log(data)));
+// console.log(db.update(usersTable).set({ avatar: 'https://i.pravatar.cc/150?img=32' }).then(data => console.log(data)));
 
 app.use(morgan('dev'));
 app.use(express.json());
