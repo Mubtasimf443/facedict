@@ -22,6 +22,8 @@ import Post from "@/components/ui/Post";
 import { toast } from "@/components/shadcn/toast";
 import ShareProfileBtn from "./ShareProfileBtn";
 import EditProfileBtn from "./EditProfileBtn";
+import AddEducationDialog from "./AddEducationDialog";
+import AddJobHistoryDialog from "./AddJobHistoryDialog";
 
 interface UserProfilePageProps {
     user: UserProfile;
@@ -160,9 +162,7 @@ export default function UserProfilePage({ user }: UserProfilePageProps) {
                                     {user.education.length < 4 &&
                                         <CardFooter >
                                             <CardAction>
-                                                <Button className={'bg-[#1c4095] cursor-pointer'}>
-                                                    Add Education
-                                                </Button>
+                                                <AddEducationDialog />
                                             </CardAction>
                                         </CardFooter>
                                     }
@@ -188,9 +188,7 @@ export default function UserProfilePage({ user }: UserProfilePageProps) {
                                     </CardContent>
                                     <CardFooter >
                                         <CardAction>
-                                            <Button className={'bg-[#1c4095] cursor-pointer'}>
-                                                Add Job History
-                                            </Button>
+                                            <AddJobHistoryDialog />
                                         </CardAction>
                                     </CardFooter>
                                 </Card>

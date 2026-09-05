@@ -12,11 +12,11 @@ import { useState } from "react";
 
 
 export default function EditProfileBtn() {
-    let [country, setCountry] = useState('Bangladesh')
     return (
         <Sheet >
             <SheetTrigger className={"bg-transparent text-[#1c4095] border-2 border-[#1c4095] rounded-full px-3 cursor-pointer"} >Edit Profile </SheetTrigger>
             <SheetContent className={'w-full box-border px-3 py-2 overflow-x-hidden overflow-y-scroll'}>
+                
                 <SheetHeader className="flex flex-row justify-between items-center px-2 w-full">
                     <SheetTitle>Edit Profile</SheetTitle>
                 </SheetHeader>
@@ -147,6 +147,7 @@ export default function EditProfileBtn() {
                 <SheetFooter className="w-full">
                     <button type="submit" className="bg-[#1c4095] text-white border-none rounded-full p-2 w-full">Save Change</button>
                 </SheetFooter>
+
             </SheetContent>
         </Sheet>
     )
