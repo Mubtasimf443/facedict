@@ -1,6 +1,6 @@
 /* بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيْمِ ﷺ InshaAllah */
 
-import UserProfilePage from "../../../../features/profile/UserProfile";
+import UserProfilePage from "@/features/profile/UserProfile";
 import { type UserProfile } from "@/features/profile/userProfile.types";
 
 
