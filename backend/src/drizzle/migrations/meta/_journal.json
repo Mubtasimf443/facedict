@@ -43,6 +43,13 @@
       "when": 1788514719685,
       "tag": "0005_thick_microbe",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1788802957854,
+      "tag": "0006_dry_nehzno",
+      "breakpoints": true
     }
   ]
 }

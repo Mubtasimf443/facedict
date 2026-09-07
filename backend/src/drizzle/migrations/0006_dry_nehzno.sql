@@ -1,0 +1,1 @@
+ALTER TABLE `usersTable` ADD `website` text;
