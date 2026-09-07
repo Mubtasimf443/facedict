@@ -10,7 +10,7 @@ import {
     TabsTrigger,
 } from "@/components/shadcn/tabs"
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/shadcn/avatar'
-import Friends from '@/features/search/Friends'
+import Friends from '@/components/ui/Friends'
 import { samplePosts } from '@/data/samplePost'
 import Post from '@/components/ui/Post'
 
@@ -132,7 +132,7 @@ export default function Page() {
                             <TabsTrigger value={'Post'}>Post</TabsTrigger>
                         </TabsList>
                         <TabsContent value={'All'} className={'w-sm md:w-md lg:w-lg xl:w-xl flex flex-col justify-start items-start gap-y-3'}>
-                            <h3 className='text-lg text-left font-semibold py-2 px-3 bg-gray-100 rounded-lg inline text-left'>Friends :</h3>
+                            <h3 className='text-lg text-left font-semibold py-2 px-3 bg-gray-100 rounded-lg inline'>Friends :</h3>
                             <div className="flex flex-col w-full">
                                 <Friends
                                     userImageSrc={'https://img.icons8.com/material-two-tone/24/user.png'}
@@ -152,7 +152,7 @@ export default function Page() {
                                 <button className='px-5 py-3 text-[#1c4095] border-2 border-[#1c4095] font-semibold rounded-md w-full cursor-pointer'>Load More</button>
                             </div>
 
-                            <h3 className='text-lg text-left font-semibold py-2 px-3 bg-gray-100 rounded-lg inline text-left'>Post :</h3>
+                            <h3 className='text-lg text-left font-semibold py-2 px-3 bg-gray-100 rounded-lg inline'>Post :</h3>
                             <div className="flex flex-col justify-start items-start w-full">
                                 {samplePosts.map((post) =>
                                     <Post

@@ -25,7 +25,8 @@ export default function AddJobHistoryDialog() {
         } catch (error) {
             console.error({ error });
         } finally {
-            // setIsFormDisabled(false);
+            setIsFormDisabled(false);
+            setIsDialogOpen(false);
         }
     }
     useEffect(() => {

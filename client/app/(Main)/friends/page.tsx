@@ -1,7 +1,7 @@
 /* بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيْمِ ﷺ InshaAllah */
 "use client"
 
-import Friends from "@/features/search/Friends"
+import Friends from "@/components/ui/Friends"
 
 export default function page() {
     return (

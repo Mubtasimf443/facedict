@@ -22,6 +22,7 @@ export default function AddEducationDialog() {
             console.error({error});
         } finally {
             setIsFormDisabled(false);
+            setIsDialogOpen(false);
         }
     }
   return (
