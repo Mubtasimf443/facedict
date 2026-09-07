@@ -1,0 +1,21 @@
+"use strict";
+/* بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيْمِ ﷺ InshaAllah */
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.CLOUDINARY_API_SECRET = exports.CLOUDINARY_API_KEY = exports.CLOUDINARY_CLOUD = exports.REDIS_HOST = exports.REDIS_URL = exports.SMTP_PASS = exports.SMTP_USER = exports.MYSQL_DB_PASSWORD = exports.MYSQL_DB_PORT = exports.MYSQL_DB_USERNAME = exports.MYSQL_DB_HOST = exports.MYSQL_DB_URI = exports.MYSQL_DB_DATABASE_NAME = exports.PORT = exports.NODE_ENV = void 0;
+const dotenv_1 = require("dotenv");
+(0, dotenv_1.config)();
+exports.NODE_ENV = process.env.NODE_ENV;
+exports.PORT = process.env.PORT;
+exports.MYSQL_DB_DATABASE_NAME = process.env.MYSQL_DB_DATABASE_NAME;
+exports.MYSQL_DB_URI = process.env.MYSQL_DB_URI;
+exports.MYSQL_DB_HOST = process.env.MYSQL_DB_HOST;
+exports.MYSQL_DB_USERNAME = process.env.MYSQL_DB_USERNAME;
+exports.MYSQL_DB_PORT = process.env.MYSQL_DB_PORT;
+exports.MYSQL_DB_PASSWORD = process.env.MYSQL_DB_PASSWORD;
+exports.SMTP_USER = process.env.SMTP_USER;
+exports.SMTP_PASS = process.env.SMTP_PASS;
+exports.REDIS_URL = process.env.REDIS_URL;
+exports.REDIS_HOST = process.env.REDIS_HOST;
+exports.CLOUDINARY_CLOUD = process.env.CLOUDINARY_CLOUD;
+exports.CLOUDINARY_API_KEY = process.env.CLOUDINARY_API_KEY;
+exports.CLOUDINARY_API_SECRET = process.env.CLOUDINARY_API_SECRET;

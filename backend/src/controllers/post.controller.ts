@@ -23,14 +23,18 @@ export default class postController {
             if (!success || !data || !!error) {
                 return res.status(400).json({})
             }
-            let ids = await db.insert(postTables)
-                .values({
-                    caption: data.caption,
-                    images: data.images,
-                    tags: data.tags,
-                    interest: data.interest
-                }).$returningId();
-            return res.status(200).json({ error: null, success: true, data: { id: ids[0].id } })
+            // let ids = await db.insert(postTables)
+            //     .values({
+            //         caption: data.caption,
+            //         images: data.images,
+            //         tags: data.tags,
+            //         interest: data.interest
+            //     }).$returningId();
+            return res.status(200).json({
+                error: null, 
+                success: true, 
+                // data: { id: ids[0].id } 
+            })
         } catch (error) {
             console.error(error);
             return res.status(200).json({ error, success: false , data : null })
