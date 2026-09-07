@@ -1,7 +1,8 @@
 /* بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيْمِ ﷺ InshaAllah */
 
 import UserProfilePage from "@/features/profile/UserProfile";
-import type { UserProfile } from "@/features/profile/userProfile.types";
+import { type UserProfile } from "@/features/profile/userProfile.types";
+
 
 // Replace this with your fetch (server component, so you can `await fetch(...)`
 // or call your DB/ORM directly here).

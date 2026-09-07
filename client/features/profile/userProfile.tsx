@@ -2,7 +2,6 @@
 "use client"
 import Image from "next/image";
 import { Mail, Phone, Cake, CircleDot, MapPin, Link2, Calendar, Pencil, MoreHorizontal, BadgeCheck, GraduationCap, BriefcaseBusiness } from "lucide-react";
-
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/shadcn/avatar";
 import { Button } from "@/components/shadcn/button";
 import { Card, CardAction, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/shadcn/card";
