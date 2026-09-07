@@ -76,7 +76,7 @@ class AuthController {
                 .status(200)
                 .cookie('sign_up_verification_session', suvs, {
                 httpOnly: true,
-                sameSite: 'lax',
+                sameSite: env_1.COOKIES_SAMESITE,
                 maxAge: 65 * 1000,
                 secure: env_1.NODE_ENV === 'production'
             })
@@ -111,7 +111,7 @@ class AuthController {
                 .status(200)
                 .cookie('login_session', login_session, {
                 httpOnly: true,
-                sameSite: false,
+                sameSite: env_1.COOKIES_SAMESITE,
                 maxAge: 7 * 24 * 60 * 60 * 1000,
                 secure: env_1.NODE_ENV === 'production'
             })
@@ -145,7 +145,7 @@ class AuthController {
                 .status(200)
                 .cookie('login_session', login_session, {
                 httpOnly: true,
-                sameSite: false,
+                sameSite: env_1.COOKIES_SAMESITE,
                 maxAge: 7 * 24 * 60 * 60 * 1000,
                 secure: env_1.NODE_ENV === 'production'
             })
@@ -170,7 +170,7 @@ class AuthController {
                 .status(200)
                 .clearCookie('login_session', {
                 httpOnly: true,
-                sameSite: false,
+                sameSite: env_1.COOKIES_SAMESITE,
                 secure: env_1.NODE_ENV === 'production'
             })
                 .json({ success: true, data: null, error: null });

@@ -10,7 +10,7 @@ import { log } from "console";
 import db from "../config/db";
 import { usersTable } from "../drizzle/schema";
 import { eq } from "drizzle-orm";
-import { NODE_ENV } from "../config/env";
+import { COOKIES_SAMESITE, NODE_ENV } from "../config/env";
 
 export default class AuthController {
     static async SignUp(req: Request, res: Response): Promise<Response> {
@@ -40,7 +40,7 @@ export default class AuthController {
                 .status(200)
                 .cookie('sign_up_verification_session', suvs, {
                     httpOnly: true,
-                    sameSite: 'lax',
+                    sameSite: COOKIES_SAMESITE,
                     maxAge: 65 * 1000,
                     secure: NODE_ENV === 'production'
                 })
@@ -76,7 +76,7 @@ export default class AuthController {
                 .status(200)
                 .cookie('login_session', login_session, {
                     httpOnly: true,
-                    sameSite: false,
+                    sameSite: COOKIES_SAMESITE,
                     maxAge: 7 * 24 * 60 * 60 * 1000,
                     secure: NODE_ENV === 'production'
                 })
@@ -114,7 +114,7 @@ export default class AuthController {
                 .status(200)
                 .cookie('login_session', login_session, {
                     httpOnly: true,
-                    sameSite: false,
+                    sameSite: COOKIES_SAMESITE,
                     maxAge: 7 * 24 * 60 * 60 * 1000,
                     secure: NODE_ENV === 'production'
                 })
@@ -140,7 +140,7 @@ export default class AuthController {
                 .status(200)
                 .clearCookie('login_session', {
                     httpOnly: true,
-                    sameSite: false,
+                    sameSite: COOKIES_SAMESITE,
                     secure: NODE_ENV === 'production'
                 })
                 .json({ success: true, data: null, error: null })
