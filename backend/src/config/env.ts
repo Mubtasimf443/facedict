@@ -5,6 +5,7 @@ config();
 
 export const NODE_ENV = process.env.NODE_ENV;
 export const PORT = process.env.PORT;
+export const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN;
 export const MYSQL_DB_DATABASE_NAME = process.env.MYSQL_DB_DATABASE_NAME;
 export const MYSQL_DB_URI = process.env.MYSQL_DB_URI;
 export const MYSQL_DB_HOST = process.env.MYSQL_DB_HOST;

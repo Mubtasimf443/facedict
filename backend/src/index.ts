@@ -1,7 +1,7 @@
 /* بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيْمِ ﷺ InshaAllah */
 
 import express, { Request, Response } from "express";
-import { PORT } from "./config/env";
+import { CLIENT_ORIGIN, PORT } from "./config/env";
 import authRouter from './routes/auth.route';
 import assetRouter from './routes/assets.route';
 import morgan from 'morgan';
@@ -13,7 +13,7 @@ import { usersTable } from "./drizzle/schema";
 const app = express();
 app.use(
   cors({
-    origin: 'http://localhost:3000',
+    origin: CLIENT_ORIGIN!,
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true,
   })
