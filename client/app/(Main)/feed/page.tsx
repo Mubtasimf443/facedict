@@ -1,5 +1,6 @@
 /* بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيْمِ ﷺ InshaAllah */
 "use client"
+import CreatePostDialog from '@/components/ui/CreatePostDialog'
 import CreatePostInput from '@/components/ui/CreatePostInput'
 import Post from '@/components/ui/Post'
 import { samplePosts } from '@/data/samplePost'
@@ -10,7 +11,11 @@ export default function page() {
   let avatar = useUserDetailsStore(state => state.avatar);
   return (
     <div className='w-full flex flex-col justify-start items-center'>
-      <CreatePostInput userImage={avatar || 'https://img.icons8.com/material-two-tone/24/user.png'} onSubmit={() => {}} imageWidth={33} imageHeight={33} />
+      <CreatePostDialog
+        userImage={avatar || 'https://img.icons8.com/material-two-tone/24/user.png'}
+        imageWidth={33}
+        imageHeight={33}
+      />
       {samplePosts.map(post =>
         <Post
           key={post.id}

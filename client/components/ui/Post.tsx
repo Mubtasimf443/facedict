@@ -7,6 +7,8 @@ import Image from 'next/image'
 import React, { useRef, useState } from 'react'
 import { Avatar, AvatarImage } from '@/components/shadcn/avatar'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../shadcn/dropdown-menu'
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '../shadcn/carousel'
+import { Card, CardContent } from '../shadcn/card'
 
 type User = {
     name: string
@@ -200,13 +202,13 @@ export default function Post({
                     <DropdownMenuContent>
                         <DropdownMenuItem className={'text-sm text-gray-500 flex flex-row justify-between items-center'}>
                             Remove
-                            <span className='text-red-700'><Trash size={20}/></span>
+                            <span className='text-red-700'><Trash size={20} /></span>
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
             </div>
             <span className='text-sm text-gray-800 '>{description}</span>
-            
+
             {/* Image carousel */}
             <div className="relative w-full">
                 <div
@@ -251,8 +253,7 @@ export default function Post({
                 )}
             </div>
 
-        
-
+           
             {/* Action bar */}
             <div className="flex flex-row items-center justify-start gap-4 px-4 pt-3">
                 <button

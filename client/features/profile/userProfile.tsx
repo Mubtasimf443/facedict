@@ -15,6 +15,7 @@ import ShareProfileBtn from "./ShareProfileBtn";
 import EditProfileBtn from "./EditProfileBtn";
 import AddEducationDialog from "./AddEducationDialog";
 import AddJobHistoryDialog from "./AddJobHistoryDialog";
+import CreatePostDialog from "@/components/ui/CreatePostDialog";
 
 interface UserProfilePageProps {
     user: UserProfile;
@@ -212,12 +213,11 @@ export default function UserProfilePage({ user }: UserProfilePageProps) {
                         </TabsContent>
 
                         <TabsContent value="posts" className="w-full mt-5">
-                            <CreatePostInput
-                                onSubmit={() => { }}
+                            <CreatePostDialog
                                 userImage={user.avatarUrl}
                                 imageWidth={30}
                                 imageHeight={30}
-                                maxWidth={'7xl'}
+                                maxIputBoxWidth="7xl"
                             />
                             <div className="grid grid-cols-2 max-lg:grid-cols-1 gap-3 justify-start items-center">
                                 {samplePosts.map((post) =>
