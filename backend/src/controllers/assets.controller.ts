@@ -18,7 +18,7 @@ export default class AssetsController {
                 uploadDir: path.resolve(__dirname, '../../uploads'),
                 maxFiles: 1,
                 allowEmptyFiles: false,
-                maxFileSize: 10 * 1024 * 1024,
+                maxFileSize: 1 * 1024 * 1024,
                 filter: (file) => {
                     if (file.mimetype === 'image/png'
                         || file.mimetype === 'image/jpg'

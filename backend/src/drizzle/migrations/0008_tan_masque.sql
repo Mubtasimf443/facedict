@@ -1,0 +1,1 @@
+ALTER TABLE `usersTable` MODIFY COLUMN `about` text DEFAULT ('');

@@ -20,19 +20,14 @@ const layout = ({ children }: { children: React.ReactNode }) => {
         });
         // await new Promise(resolve => setTimeout(resolve, 5000));
 
+        if (response.status === 404) setIsUserLoggedOut(true);
         if (response.status === 401) setIsUserLoggedOut(true);
         if (response.status === 500) setIsServerError(true);
         if (response.status === 200) {
             let { data } = await response.json();
-            setUserDetails({
-                name: data.user.name,
-                emaii: data.user.email,
-                avatar: data.user.avater,
-                coverImage: data.user.coverImage,
-                bio: data.user.bio,
-                id : data.user.id
-            });
-            setLoadingComponent(false)
+            console.log({ data });
+            setUserDetails({ ...data.user });
+            setLoadingComponent(false);
         }
     }
     useEffect(() => { fetchUserDate() }, []);

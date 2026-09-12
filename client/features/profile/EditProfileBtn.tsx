@@ -92,40 +92,7 @@ export default function EditProfileBtn() {
                     <Input name="website" id="website-input" type="text" placeholder="Enter Your website url" />
                     <FieldDescription className="text-xs"></FieldDescription>
                 </Field>
-                <Field>
-                    <FieldLabel htmlFor="language-input">Language</FieldLabel>
-                    <div className="flex flex-row justify-start items-center gap-x-2 box-border">
-                        <Combobox>
-                            <ComboboxInput className={'w-[30%]'} name="language" id="language-input" type="text" placeholder="Language" />
-                            <ComboboxContent >
-                                <ComboboxEmpty>No Language Found</ComboboxEmpty>
-                                <ComboboxList  >
-                                    {languages.map((lang, key) => <ComboboxItem key={key} value={lang} >{lang}</ComboboxItem>)}
-                                </ComboboxList>
-                            </ComboboxContent>
-                        </Combobox>
-                        <Combobox  >
-                            <ComboboxInput className={'w-[30%]'} name="language" id="language-input" type="text" placeholder="Language" />
-                            <ComboboxContent >
-                                <ComboboxEmpty>No Language Found</ComboboxEmpty>
-                                <ComboboxList  >
-                                    {languages.map((lang, key) => <ComboboxItem key={key} value={lang} >{lang}</ComboboxItem>)}
-                                </ComboboxList>
-                            </ComboboxContent>
-                        </Combobox>
-                        <Combobox   >
-                            <ComboboxInput className={'w-[30%]'} name="language" id="language-input" type="text" placeholder="Language" />
-                            <ComboboxContent >
-                                <ComboboxEmpty>No Language Found</ComboboxEmpty>
-                                <ComboboxList  >
-                                    {languages.map((lang, key) => <ComboboxItem key={key} value={lang} >{lang}</ComboboxItem>)}
-                                </ComboboxList>
-                            </ComboboxContent>
-                        </Combobox>
-                    </div>
-
-                    <FieldDescription className="text-xs"></FieldDescription>
-                </Field>
+               
                 <Field>
                     <FieldLabel htmlFor="religion-input">Religion</FieldLabel>
                     <Combobox defaultInputValue={'Islam'}>

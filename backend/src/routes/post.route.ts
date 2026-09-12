@@ -8,6 +8,6 @@ const router =Router();
 router.use(userMiddleWare);
 
 router.get('/feed', postController.getFeed);
-router.get('/create/post', postController.createPost);
+router.post('/create', postController.createPost);
 
 export default router;

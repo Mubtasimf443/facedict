@@ -27,7 +27,7 @@ export default class AuthController {
                 return res.status(400).json({ success: false, data: null, error: { message: 'This email is registered, please sign in with the email' } });
             }
             let suvs = AuthService.generate_auth_session();
-            let otp = generateOtp();
+            let otp = generateOtp();console.log(otp);
             let payload = JSON.stringify({ ...data, otp });
             let isOk = await redisClient.set(`sign_up_verification_session:${suvs}`, payload, 'EX', 65);
             if (isOk != 'OK') {
@@ -44,7 +44,7 @@ export default class AuthController {
                     maxAge: 65 * 1000,
                     secure: NODE_ENV === 'production'
                 })
-                .json({ success: true, data: { session: suvs }, error: null });
+                .json({ success: true, data: null, error: null });
         } catch (error) {
             console.error({ error });
             return res.status(500).json({ success: false, data: null, error })
@@ -116,7 +116,8 @@ export default class AuthController {
                     httpOnly: true,
                     sameSite: COOKIES_SAMESITE,
                     maxAge: 7 * 24 * 60 * 60 * 1000,
-                    secure: NODE_ENV === 'production'
+                    secure: NODE_ENV === 'production',
+                
                 })
                 .json({ success: true, error: null })
         } catch (error) {
@@ -141,7 +142,8 @@ export default class AuthController {
                 .clearCookie('login_session', {
                     httpOnly: true,
                     sameSite: COOKIES_SAMESITE,
-                    secure: NODE_ENV === 'production'
+                    secure: NODE_ENV === 'production',
+                    
                 })
                 .json({ success: true, data: null, error: null })
         } catch (error) {
@@ -160,6 +162,19 @@ export default class AuthController {
                     avater: usersTable.avatar,
                     coverImage: usersTable.coverImage,
                     bio: usersTable.bio,
+                    about : usersTable.about,
+                    religion: usersTable.religion,
+                    website : usersTable.website,
+                    nationality : usersTable.nationality,
+                    languages : usersTable.languages,
+                    location : usersTable.location,
+                    gender : usersTable.gender,
+                    job : usersTable.job,
+                    education : usersTable.education,
+                    joined : usersTable.createdAt,
+                    followers : usersTable.followers,
+                    following : usersTable.following,
+                    friends: usersTable.friends
                 })
                 .from(usersTable)
                 .where(eq(usersTable.id, req.user_id!))

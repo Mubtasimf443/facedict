@@ -15,28 +15,35 @@ export const usersTable = mysqlTable("usersTable", {
     nationality: varchar('nationality', { length: 50 }).notNull(),
     is_verified: boolean('is_verified').default(false),
     is_active: boolean('is_active').default(true),
-    religion: varchar('religion', { length: 100 }).notNull(),
-    bio: varchar('bio', { length: 120 }),
-    about:text('about'),
-    website : text('website'),
-    avatar: varchar('avatar', { length: 255 }),
-    coverImage: varchar('coverImage', { length : 255 }),
+    religion: varchar('religion', { length: 100 }).notNull().default(''),
+    bio: varchar('bio', { length: 120 }).default(''),
+    about:text('about').default(''),
+    website : text('website').default(''),
+    avatar: varchar('avatar', { length: 255 }).default(''),
+    coverImage: varchar('coverImage', { length : 255 }).default(''),
     hashed_password: text('hashed_password').notNull(),
     salt: text('salt').notNull(),
-    languages: json('languages').$type<string[]>(),
-    interest: json('interest').$type<string[]>(),
-    location: json('location').$type<{
-        city: string;
-        country: string;
-        latitude: string;
-        longitude: string;
-    }>(),
+    languages: json('languages').$type<string[]>().default([]),
+    interest: json('interest').$type<string[]>().default([]),
+    location: json('location')
+        .$type<{
+            city: string;
+            country: string;
+            latitude: string;
+            longitude: string;
+        }>()
+        .default({
+            city: '',
+            country: '',
+            latitude: '',
+            longitude: ''
+        }),
     education: json('education').$type<{
         institution: string;
         degree: string;
         startYear: number;
         endYear: number;
-    }[]>(),
+    }[]>().default([]),
     job: json('job').$type<{
         title: string;
         industry_type: string;
@@ -51,7 +58,7 @@ export const usersTable = mysqlTable("usersTable", {
             month: number;
             year : number;
         },
-    }[]>(),
+    }[]>().default([]),
     createdAt : timestamp('createdAt').defaultNow().notNull(),
     friends : json('friends').$type<number[]>().default([]),
     following : json('following').$type<number[]>().default([]),
