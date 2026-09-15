@@ -4,11 +4,12 @@
 
 import { Heart, MessageCircle, Send, MoreHorizontal, Trash } from 'lucide-react'
 import Image from 'next/image'
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { Avatar, AvatarImage } from '@/components/shadcn/avatar'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../shadcn/dropdown-menu'
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '../shadcn/carousel'
 import { Card, CardContent } from '../shadcn/card'
+import { toast } from '../shadcn/toast'
 
 type User = {
     name: string
@@ -16,34 +17,36 @@ type User = {
 }
 
 type Comment = {
-    id: string
-    author: string
-    text: string
-    image: string
+    userId: number,
+    userName: string;
+    userImage: string;
+    message: string;
+    time: Date
 }
 
 type PostProps = {
-    id: string
-    user: User
+    id: string;
+    userId : number;
+    userName: string;
+    userAvatar : string;
     images: string[]
     description: string
     initialLiked?: boolean
     likeCount?: number
     comments?: Comment[]
-    onLike: (data: { id: string; liked: boolean }) => void
     onComment?: (data: { id: string; text: string }) => void
     onShare?: (data: { id: string }) => void
 }
 
 export default function Post({
     id,
-    user,
+    userName,
+    userAvatar,
     images,
     description,
     initialLiked = false,
     likeCount = 0,
     comments = [],
-    onLike,
     onComment,
     onShare,
 }: PostProps) {
@@ -54,33 +57,34 @@ export default function Post({
     const [commentText, setCommentText] = useState('')
     const [localComments, setLocalComments] = useState<Comment[]>(comments)
 
-    // Posting rule: a post must contain at least one image. Text-only posts are not allowed.
+    async function onLike() {
+        try {
+            let response = await fetch(process.env.NEXT_PUBLIC_SERVER_URL! + `/api/post/like/${id}`, {
+                method : 'POST',
+                cache : 'no-cache',
+                credentials : 'include'
+            });
+            if (response.status=== 200) {
+                let isLiked:boolean = (await response.json()).isLiked;
+                if (liked) {
+                    setLikes(prev => prev - 1)
+                } else {
+                    setLikes(prev => prev + 1)
+                }
+                setLiked(isLiked);
+            } else {
+                toast.add({title : 'Failed to Like the Post'})
+            }
+        } catch (error) {
+            console.error(error);
+            toast.add({title : 'Server Error', description : "Can't Like the post  due to an error"})
+        }
+    }
     if (!images || images.length === 0) {
         return null
     }
 
-    const handleLike = () => {
-        const nextLiked = !liked
-        setLiked(nextLiked)
-        setLikes((count) => count + (nextLiked ? 1 : -1))
-        onLike({ id, liked: nextLiked })
-    }
-
-    const handleCommentSubmit = (e: React.FormEvent) => {
-        e.preventDefault()
-        const text = commentText.trim()
-        if (!text) return
-
-        const newComment: Comment = {
-            id: `${id}-${Date.now()}`,
-            author: 'You',
-            text,
-            image: 'https://i.pravatar.cc/150?img=' + Math.floor(Math.random() * 100)
-        }
-        setLocalComments((prev) => [...prev, newComment])
-        setCommentText('')
-        onComment?.({ id, text })
-    }
+   
 
     const handleShare = async () => {
         onShare?.({ id })
@@ -96,8 +100,7 @@ export default function Post({
         }
     }
 
-    // Stop any in-flight momentum animation when the component unmounts
-    React.useEffect(() => {
+    useEffect(() => {
         return () => stopMomentum()
     }, [])
 
@@ -107,12 +110,6 @@ export default function Post({
         setActiveSlide(slide)
     }
 
-    // --- Grab-and-scroll with momentum (like YouTube's thumbnail strip) ---
-    // overflow-x-scroll alone only responds to a scrollbar drag, trackpad
-    // swipe, or Shift+wheel — a plain left-click-drag does nothing unless we
-    // manually track pointer movement. On release we also keep the scroll
-    // gliding for a bit based on how fast the pointer was moving, then let
-    // friction slow it down — that's the "momentum" feel YouTube has.
     const isDragging = useRef(false)
     const dragStartX = useRef(0)
     const scrollStartX = useRef(0)
@@ -184,16 +181,16 @@ export default function Post({
 
     return (
         <article
-            className="flex w-full max-w-lg flex-col border-b border-gray-200 bg-white gap-y-2 py-2"
+            className="flex flex-col w-full max-w-lg  border-b border-gray-200 bg-white gap-y-2 py-2"
             aria-label={id}
         >
             {/* Header: user image + name */}
             <div className="flex flex-row items-center justify-between px-4 pt-2">
                 <div className="flex flex-row items-center gap-3">
                     <Avatar className="h-9 w-9 shrink-0">
-                        <AvatarImage src={user.avatar} alt={user.name} />
+                        <AvatarImage src={userAvatar} alt={userName} />
                     </Avatar>
-                    <span className="text-sm font-semibold text-gray-900">{user.name}</span>
+                    <span className="text-sm font-semibold text-gray-900">{userName}</span>
                 </div>
                 <DropdownMenu >
                     <DropdownMenuTrigger className={"border-none bg-transparent text-gray-500 cursor-pointer"} aria-label='More options' type={'button'} >
@@ -258,10 +255,10 @@ export default function Post({
             <div className="flex flex-row items-center justify-start gap-4 px-4 pt-3">
                 <button
                     type="button"
-                    onClick={handleLike}
+                    onClick={onLike}
                     aria-pressed={liked}
                     aria-label={liked ? 'Unlike' : 'Like'}
-                    className="border-none bg-transparent text-black flex flex-row gap-x-1 text-sm"
+                    className="border-none bg-transparent text-black flex flex-row gap-x-1 text-sm cursor-pointer"
                 >
                     <Heart
                         size={22}
@@ -273,7 +270,7 @@ export default function Post({
                     type="button"
                     onClick={() => setShowComments((v) => !v)}
                     aria-label="Comment"
-                    className="border-none bg-transparent text-gray-800 flex flex-row gap-x-1 text-sm"
+                    className="border-none bg-transparent text-gray-800 flex flex-row gap-x-1 text-sm cursor-pointer"
                 >
                     <MessageCircle size={22} />
                     {comments.length}
@@ -282,7 +279,7 @@ export default function Post({
                     type="button"
                     onClick={handleShare}
                     aria-label="Share"
-                    className="border-none bg-transparent text-gray-800"
+                    className="border-none bg-transparent text-gray-800 cursor-pointer"
                 >
                     <Send size={20} />
                 </button>
@@ -304,14 +301,14 @@ export default function Post({
                         </button>
                     )}
                     <div className="flex flex-col gap-1.5">
-                        {localComments.map((comment) => (
-                            <div key={comment.id} className="text-sm text-gray-800 flex flex-row gap-y-1.5  gap-x-2 justify-start items-start">
+                        {localComments.map((comment, index) => (
+                            <div key={index} className="text-sm text-gray-800 flex flex-row gap-y-1.5  gap-x-2 justify-start items-start">
                                 <Avatar>
-                                    <AvatarImage src={comment.image} alt='user' width={20} height={20} />
+                                    <AvatarImage src={comment.userImage} alt='user' width={20} height={20} />
                                 </Avatar>
                                 <div className="flex flex-col gap-y-1 w-fit text-left box-content p-2 border-2 border-gray-200 rounded-md">
-                                    <span className='text-gray-800'>{comment.author}</span>
-                                    <span className='text-gray-600'>{comment.text}</span>
+                                    <span className='text-gray-800'>{comment.userName}</span>
+                                    <span className='text-gray-600'>{comment.message}</span>
 
                                 </div>
                             </div>
@@ -321,7 +318,7 @@ export default function Post({
             )}
 
             <form
-                onSubmit={handleCommentSubmit}
+                onSubmit={event => event.preventDefault()}
                 className="flex flex-row items-center gap-2 border-t border-gray-200 py-3 box-border "
             >
                 <input

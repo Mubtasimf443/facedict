@@ -2,171 +2,22 @@
 "use client"
 import { Avatar, AvatarImage } from "@/components/shadcn/avatar";
 import { Button } from "@/components/shadcn/button";
-import { Card, CardAction, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/shadcn/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/shadcn/tabs";
-import CreatePostDialog from "@/components/ui/CreatePostDialog";
+import { Tabs, TabsList, TabsTrigger } from "@/components/shadcn/tabs";
 import Loader from "@/components/ui/Loader";
-import Post from "@/components/ui/Post";
-import { samplePosts } from "@/data/samplePost";
 import AboutTab from "@/features/profile/Tabs/AboutTab";
-import AddEducationDialog from "@/features/profile/AddEducationDialog";
-import AddJobHistoryDialog from "@/features/profile/AddJobHistoryDialog";
 import CoverImage from "@/features/profile/CoverImage";
 import EditProfileBtn from "@/features/profile/EditProfileBtn";
 import ShareProfileBtn from "@/features/profile/ShareProfileBtn";
-import UserProfilePage from "@/features/profile/UserProfile";
-import { type UserProfile } from "@/features/profile/userProfile.types";
-import { useUserDetailsStore } from "@/lib/userDetailsStore";
-import { BriefcaseBusiness, Calendar, GraduationCap, Link2, MapPin, Pencil } from "lucide-react";
+import { Calendar, Link2, MapPin, Pencil } from "lucide-react";
 import { useEffect, useState } from "react";
 import PostTab from "@/features/profile/Tabs/PostTab";
-import { notFound } from "next/navigation";
+import {  useSearchParams } from "next/navigation";
+import LikesTab from "@/features/profile/Tabs/LikesTab";
+import { IUser } from "@/features/profile/userProfile.types";
+import MediaTab from "@/features/profile/Tabs/MediaTab";
 
 
-// Replace this with your fetch (server component, so you can `await fetch(...)`
-// or call your DB/ORM directly here).
-// const mockUser: UserProfile = {
-//   name: "Alexandra Reyes",
-//   username: "alexandrareyes",
-//   avatarUrl:
-//     "",
-//   coverImageUrl:
-//     "",
-//   bio: "Product designer & photographer. I write about visual systems and the small decisions that make interfaces feel considered. Based between Dhaka and Lisbon.",
-//   email: "alexandra.reyes@example.com",
-//   phone: "+880 1XXX-XXXXXX",
-//   birthday: "April 14, 1997",
-//   status: "Available for freelance",
-//   location: { city: 'Dhaka', country: 'Bangladesh' },
-//   website: "alexandrareyes.design",
-//   joinedDate: "March 2022",
-//   verified: true,
-//   verifiedText: "Identity verified on Mar 12, 2022.",
-//   postsCount: 248,
-//   followersCount: 12400,
-//   followingCount: 386,
-//   education: [
-//     {
-//       degree: 'HSC',
-//       institution: 'Anowara Government College',
-//       startYear: 2016,
-//       endYear: 2019
-//     },
-//     {
-//       degree: 'Bechelor Degree in Science',
-//       institution: 'Chittagong Government College',
-//       startYear: 2020,
-//       endYear: 2014
-//     },
-//     {
-//       degree: 'Masters Degree in Science',
-//       institution: 'Chittagong Government College',
-//       startYear: 2020,
-//       endYear: 2014
-//     }
-//   ],
-//   jobHistory: [
-//     {
-//       title: 'Software Engineer',
-//       company: 'Smart Framework',
-//       startDate: 2021,
-//       endDate: 2022
-//     },
-//     {
-//       title: 'Software Engineer',
-//       company: 'Realtimes Solution',
-//       startDate: 2023,
-//       endDate: 2024
-//     }
-//   ],
-//   medias: [
-//     'https://picsum.photos/id/1015/800/800',
-//     'https://picsum.photos/id/1016/800/800',
-//     'https://picsum.photos/id/1025/800/800',
-//     'https://picsum.photos/id/1035/800/800',
-//     'https://picsum.photos/id/1039/800/800',
-//     'https://picsum.photos/id/1043/800/800',
-//     'https://picsum.photos/id/1015/800/800',
-//     'https://picsum.photos/id/1016/800/800',
-//     'https://picsum.photos/id/1025/800/800',
-//     'https://picsum.photos/id/1035/800/800',
-//     'https://picsum.photos/id/1039/800/800',
-//     'https://picsum.photos/id/1043/800/800',
-//   ],
-//   friends: [
-//     {
-//       name: "Hero Alam",
-//       image: 'https://picsum.photos/id/1000/800/800',
-//     },
-//     {
-//       name: 'Md Rakib',
-//       image: 'https://picsum.photos/id/1001/800/800'
-//     },
-//     {
-//       name: 'Md Shakib',
-//       image: 'https://picsum.photos/id/1004/800/800',
-//     },
-//     {
-//       name: 'MD Shakil',
-//       image: 'https://picsum.photos/id/1003/800/800',
-//     },
-//     {
-//       name: 'Md Mosfique',
-//       image: 'https://picsum.photos/id/1002/800/800',
-//     }
-//   ]
-// };
-interface IUser {
-  isDefaultUserId: boolean;
-  id: number;
-  name: string;
-  email: string;
-  avater: string ;
-  coverImage: string ;
-  bio: string ;
-  about: string ;
-  religion: string;
-  website: string ;
-  nationality: string;
-  languages: string[] ;
-  postsCount : number;
-  location: {
-    city: string;
-    country: string;
-    latitude: string;
-    longitude: string;
-  } ;
 
-  gender: string;
-
-  job: {
-    title: string;
-    industry_type: string;
-    company: string;
-    startDate: {
-      day: number;
-      month: number;
-      year: number;
-    };
-    endDate: {
-      day: number;
-      month: number;
-      year: number;
-    };
-  }[] ;
-
-  education: {
-    institution: string;
-    degree: string;
-    startYear: number;
-    endYear: number;
-  }[] ;
-
-  joined: string;
-  followers: number[] ;
-  following: number[] ;
-  friends: number[] ;
-}
 const initialUser: IUser = {
   isDefaultUserId: false,
   id: 0,
@@ -201,7 +52,10 @@ const initialUser: IUser = {
   following: [],
   friends: [],
 };
+const CurrentTabList = ['about', 'posts', 'likes', 'media', 'friends'];
 export default function Page({ params }: { params: Promise<{ id: string }> }) {
+  let searchParams = useSearchParams().get('tab') || ''
+  let currentTab =CurrentTabList.includes(searchParams ) ? searchParams : 'about';
   const [loading, setLoading] = useState<boolean>(true);
   const [loadingError, setLoadingError] = useState<string>('');
   const [user, setUser] = useState<IUser>(initialUser);
@@ -323,7 +177,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
 
 
         <div className="w-full mt-5">
-          <Tabs defaultValue="about" className={'max-lg:px-3'}>
+          <Tabs defaultValue={currentTab} className={'max-lg:px-3'}>
             <TabsList>
               <TabsTrigger value="about">About</TabsTrigger>
               <TabsTrigger value="posts">Posts</TabsTrigger>
@@ -331,6 +185,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
               <TabsTrigger value="likes">Likes</TabsTrigger>
               <TabsTrigger value="friends">Friends</TabsTrigger>
             </TabsList>
+
             <AboutTab
               education={user.education}
               religion={user.religion}
@@ -339,49 +194,19 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
               about={user.about}
             />
 
+
             <PostTab
               isDefaultUserId={user.isDefaultUserId}
               defaultUserImage={user.avater}
+              userId={user.id}
+              userName={user.name}
+              userAvatar={user.avater || 'https://placehold.co/400x400/cccccc/cccccc'}
             />
-{/* 
-            <TabsContent value="media" className="mt-5 ">
-              {user.medias.length === 0 && <span className="text-gray-600">No media yet.</span>}
-              {user.medias.length >= 1 &&
-                <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-col-5 xl:grid-cols-6 2xl:grid-cols-8 gap-3">
-                  {user.medias.map((media, index) =>
-                    <Image key={index} src={media} alt="media" width={150} height={150} className=" aspect-square" />
-                  )}
-                </div>
-              }
 
+            <LikesTab userId={user.id} />
 
-            </TabsContent> */}
-            {/* <TabsContent value="likes" className="mt-5 text-sm text-muted-foreground">
-              {samplePosts.length > 0 &&
-                <div className="grid grid-cols-2 max-lg:grid-cols-1 gap-3 justify-start items-center">
-                  {samplePosts.map((post) =>
-                    <Post
-                      key={post.id}
-                      id={post.id}
-                      user={post.user}
-                      images={post.images}
-                      description={post.description}
-                      likeCount={post.likeCount}
-                      comments={post.comments}
-                      onLike={({ id, liked }) =>
-                        console.log(`Post ${id} liked:`, liked)
-                      }
-                      onComment={({ id, text }) =>
-                        console.log(`New comment on ${id}:`, text)
-                      }
-                      onShare={({ id }) => console.log(`Post ${id} shared`)}
-                    />
-                  )}
-                </div>
-              }
-              {samplePosts.length < 1 && "No likes yet."}
+            <MediaTab userId={user.id} />
 
-            </TabsContent> */}
             {/* <TabsContent value={'friends'} className={'w-full mt-5'} >
               {user.friends.length === 0 && "No Friends Yet"}
               <div className="flex flex-row justify-start items-start gap-3">
@@ -403,7 +228,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
 
       </div>
     </div>
-  
+
   )
 }
 

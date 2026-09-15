@@ -1,0 +1,2 @@
+ALTER TABLE `usersTable` MODIFY COLUMN `avatar` varchar(255) DEFAULT 'https://placehold.co/400x400/cccccc/cccccc';--> statement-breakpoint
+ALTER TABLE `usersTable` MODIFY COLUMN `coverImage` varchar(255) DEFAULT 'https://placehold.co/400x400/cccccc/cccccc';

@@ -1,49 +1,53 @@
-export interface ProfilePost {
-  id: string;
-  imageUrl: string;
-  alt?: string;
-}
-interface IEducation {
-  degree: string;
-  institution: string;
-  startYear: number;
-  endYear: number;
-}
-interface IJobHistory {
-  title: string;
-  company: string;
-  startDate: number,
-  endDate: number,
-}
-interface ILocation {
-  city : string;
-  country : string;
-}
-interface IFriends {
-  name : string;
-  image : string;
-}
-export interface UserProfile {
+/* بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيْمِ ﷺ InshaAllah */
+
+export interface IUser {
+  isDefaultUserId: boolean;
+  id: number;
   name: string;
-  username: string;
-  avatarUrl: string;
-  coverImageUrl: string;
-  bio: string;
   email: string;
-  phone?: string;
-  birthday?: string;
-  status?: string;
-  location?: ILocation;
-  website?: string;
-  education : IEducation[],
-  jobHistory : IJobHistory[],
-  joinedDate: string;
-  medias : string[],
-  verified: boolean;
-  verifiedText?: string;
+  avater: string;
+  coverImage: string;
+  bio: string;
+  about: string;
+  religion: string;
+  website: string;
+  nationality: string;
+  languages: string[];
   postsCount: number;
-  followersCount: number;
-  followingCount: number;
-  friends : IFriends[]
+  location: {
+    city: string;
+    country: string;
+    latitude: string;
+    longitude: string;
+  };
+
+  gender: string;
+
+  job: {
+    title: string;
+    industry_type: string;
+    company: string;
+    startDate: {
+      day: number;
+      month: number;
+      year: number;
+    };
+    endDate: {
+      day: number;
+      month: number;
+      year: number;
+    };
+  }[];
+
+  education: {
+    institution: string;
+    degree: string;
+    startYear: number;
+    endYear: number;
+  }[];
+
+  joined: string;
+  followers: number[];
+  following: number[];
+  friends: number[];
 }
- 

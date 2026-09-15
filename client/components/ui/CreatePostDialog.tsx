@@ -11,6 +11,7 @@ import { Combobox, ComboboxContent, ComboboxEmpty, ComboboxInput, ComboboxItem, 
 import { interest } from '@/data/interest';
 import { toast } from '../shadcn/toast';
 import z from 'zod';
+import { useRouter } from 'next/navigation';
 
 type WidthTypes = 'lg' | 'sm' | 'md' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl' | '6xl' | '7xl';
 
@@ -20,7 +21,8 @@ interface IData {
     tags: string[];
     interest: string[];
 }
-export default function CreatePostDialog({ userImage, imageWidth, imageHeight, maxIputBoxWidth = 'lg' }: { userImage: string, imageWidth: number, imageHeight: number, maxIputBoxWidth?: WidthTypes }) {
+export default function CreatePostDialog({ userId, userImage, imageWidth, imageHeight, maxIputBoxWidth = 'lg' }: { userImage: string, imageWidth: number, imageHeight: number, maxIputBoxWidth?: WidthTypes, userId : number }) {
+    let router = useRouter();
     let dialogRef = useRef<HTMLDialogElement>(null);
     let [data, setData] = useState<IData>({
         title: '',
@@ -103,6 +105,9 @@ export default function CreatePostDialog({ userImage, imageWidth, imageHeight, m
         } finally {
         }
     }
+    function redirectToProfile() {
+        router.push('/profile/' + userId)
+    }
     async function handlePostSubmit() {
         try {
             setCreatingAPost(true)
@@ -148,18 +153,26 @@ export default function CreatePostDialog({ userImage, imageWidth, imageHeight, m
             setTimeout(() => setDialogError(''), 5000);
         } finally {
             setCreatingAPost(false)
+            router.refresh();
         }
     }
     return (
         <div className='w-full flex flex-row justify-center items-start'>
-            <button onClick={OpenDialog} className={`flex flex-row justify-start items-center box-border gap-x-3 h-10 my-3 w-full max-w-${maxIputBoxWidth} bg-transparent border-none`}>
-                <Image src={userImage || 'https://placehold.co/400x400/cccccc/cccccc'} alt='User' width={imageWidth} height={imageHeight} className='border-2 border-[#1c4095] object-cover  aspect-square rounded-full' />
-                <div className="flex flex-row w-full justify-start items-center border-none h-full rounded-full bg-[#1c40952c] p-2 gap-x-1.5">
+            <div  className={`flex flex-row justify-start items-center box-border gap-x-3 h-10 my-3 w-full max-w-${maxIputBoxWidth} bg-transparent border-none`}>
+                <Image
+                    onClick={redirectToProfile}
+                    src={userImage || 'https://placehold.co/400x400/cccccc/cccccc'}
+                    alt='User'
+                    width={imageWidth}
+                    height={imageHeight}
+                    className='border-2 border-[#1c4095] object-cover cursor-pointer aspect-square rounded-full'
+                />
+                <div onClick={OpenDialog} className="flex flex-row w-full justify-start items-center border-none h-full rounded-full bg-[#1c40952c] p-2 gap-x-1.5">
                     <SquarePen size={20} />
                     <input type="text" className='outline-none border-none bg-transparent placeholder:text-gray-500 h-full' placeholder='What You are thinking?' />
                 </div>
                 <span className="border-none text-[#1c4095] text-lg ">Post</span>
-            </button>
+            </div>
             <dialog
                 ref={dialogRef}
                 className='fixed box-border w-full left-[50%] top-[50%] m-0 max-w-xl -translate-x-1/2 -translate-y-1/2 rounded-xl border border-gray-200 bg-white p-6 shadow-2xl backdrop:bg-black/50'

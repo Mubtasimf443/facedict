@@ -27,7 +27,7 @@ export default class AuthController {
                 return res.status(400).json({ success: false, data: null, error: { message: 'This email is registered, please sign in with the email' } });
             }
             let suvs = AuthService.generate_auth_session();
-            let otp = generateOtp();console.log(otp);
+            let otp = generateOtp();
             let payload = JSON.stringify({ ...data, otp });
             let isOk = await redisClient.set(`sign_up_verification_session:${suvs}`, payload, 'EX', 65);
             if (isOk != 'OK') {
@@ -153,7 +153,7 @@ export default class AuthController {
     }
 
     static async userDetails(req: Request, res: Response) {
-        try {
+        try {  
             let user = await db
                 .select({
                     id :usersTable.id,

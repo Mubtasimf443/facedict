@@ -5,6 +5,7 @@ import ProfileService from "../services/profile.service";
 import db from "../config/db";
 import { postTables, usersTable } from "../drizzle/schema";
 import { count, eq } from "drizzle-orm";
+import z from "zod";
 
 export default class ProfileController {
     static async updateProfileInfo(req : Request, res : Response) {
@@ -86,6 +87,38 @@ export default class ProfileController {
                 postsCount,
                 ...users[0]
             })
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({ error, data: null, success: false })
+        }
+    }
+    static async getUserUplaodedPost(req : Request, res : Response) {
+        try {
+            let page = z.number().int().optional().default(0).parse(Number(req.query.page));
+            let postCount = (await db
+                .select({ count: count() })
+                .from(postTables)
+                .where(eq(usersTable.id, req.user_id!)))[0].count;
+            
+            let totalPages = Math.floor(postCount/10);
+            let post = await db
+                .select({
+                    caption : postTables.caption,
+                    images : postTables.images,
+                    id : postTables.id,
+                    likes : postTables.likes,
+                    comments : postTables.comments
+                })
+                .from(postTables)
+                .where(eq(postTables.author, req.user_id!))
+                .limit(10)
+                .offset(page < totalPages ? page * 10 : (totalPages -1) * 10);
+
+            return res.status(200).json({ 
+                totalPages: postCount / 10,
+                currentPage: page < totalPages ? page : totalPages ,
+                post
+            });
         } catch (error) {
             console.error(error);
             return res.status(500).json({ error, data: null, success: false })

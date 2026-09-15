@@ -24,7 +24,7 @@ export default async function userMiddleWare(req : Request , res : Response, nex
             .regex(/^[0-9a-f]{160}$/, { message: 'Auth session token must be a valid hex string' });
         let user = await redisClient.get(`login_session:${authSessionSchema.parse(bearerAccessToken)}`)
         if (user === null) {
-            res.status(401).json({ error : { message : 'User is logged Out'}})
+            res.status(401).json({ error: { message: 'User is logged Out' }, success: false, data: null })
         }
         if (typeof user === 'string') req.user_id = JSON.parse(user).id;
         return next();

@@ -19,8 +19,8 @@ export const usersTable = mysqlTable("usersTable", {
     bio: varchar('bio', { length: 120 }).default(''),
     about:text('about').default(''),
     website : text('website').default(''),
-    avatar: varchar('avatar', { length: 255 }).default(''),
-    coverImage: varchar('coverImage', { length : 255 }).default(''),
+    avatar: varchar('avatar', { length: 255 }).default('https://placehold.co/400x400/cccccc/cccccc'),
+    coverImage: varchar('coverImage', { length : 255 }).default('https://placehold.co/400x400/cccccc/cccccc'),
     hashed_password: text('hashed_password').notNull(),
     salt: text('salt').notNull(),
     languages: json('languages').$type<string[]>().default([]),
@@ -81,14 +81,25 @@ export const friendshipRequestTable = mysqlTable('friendshipRequest', {
 export const postTables = mysqlTable('postTable', {
     id: int('id').primaryKey().autoincrement().unique().notNull(),
     caption: text('caption').notNull(),
-    images: json('images').$type<string[]>(),
+    images: json('images').$type<string[]>().default([]),
     createdAt: timestamp('createdAt').defaultNow().notNull(),
-    likes: json('likes').$type<{
-        userId: number,
-        time: Date
-    }[]>()
+    comments: json('comments')
+        .$type<{
+            userId: number,
+            userName: string,
+            userImage : string;
+            message: string,
+            time : Date
+        }[]>()
         .default([]),
-    tags: json('tags').$type<string[]>(),
-    interest: json('interest').$type<string[]>(),
+    likes: json('likes')
+        .$type<{
+                userId: number,
+                time: Date,
+                userName: string,
+            }[]>()
+        .default([]),
+    tags: json('tags').$type<string[]>().default([]),
+    interest: json('interest').$type<string[]>().default([]),
     author: int('author').notNull().references(() => usersTable.id, { onDelete: 'cascade' })
 });

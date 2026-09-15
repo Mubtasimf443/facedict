@@ -25,7 +25,6 @@ const layout = ({ children }: { children: React.ReactNode }) => {
         if (response.status === 500) setIsServerError(true);
         if (response.status === 200) {
             let { data } = await response.json();
-            console.log({ data });
             setUserDetails({ ...data.user });
             setLoadingComponent(false);
         }

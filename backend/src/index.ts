@@ -11,7 +11,8 @@ import cors from 'cors'
 import db from "./config/db";
 import { postTables, usersTable } from "./drizzle/schema";
 import { profileRouter } from "./routes/profile.route";
-import { count } from "drizzle-orm";
+import { count, eq } from "drizzle-orm";
+import { friendsRouter } from "./routes/friendship.route";
 
 const app = express();
 app.use(
@@ -21,9 +22,8 @@ app.use(
     credentials: true,
   })
 );
-// console.log(db.select({ count : count()}).from(usersTable).then(data => console.log({data})));
-// console.log(db.update(usersTable).set({ avatar: 'https://i.pravatar.cc/150?img=32' }).then(data => console.log(data)));
-// console.log(db.delete(usersTable).then(data => console.log(data)));
+// console.log(db.select().from(usersTable).then(data => console.log({interest : data[1].interest, id : data[1].id})));
+// console.log(db.delete(usersTable).where(eq(usersTable.id, 7)).then(data => console.log(data)));
 
 app.use(morgan('dev'));
 app.use(express.json());
@@ -32,6 +32,7 @@ app.use('/api/auth', authRouter)
 app.use('/api/assets', assetRouter)
 app.use('/api/post', postRouter)
 app.use('/api/profile', profileRouter);
+app.use('/api/friends', friendsRouter);
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);

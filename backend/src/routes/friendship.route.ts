@@ -7,9 +7,10 @@ import friendsController from "../controllers/friends.controller";
 const router =Router();
 router.use(userMiddleWare)
 
-router.get('/friendship/list', friendsController.getFriendshipList);
-router.post('/friendship/send/request', friendsController.sendFriendshipRequest);
-router.post('/friendship/send/request/respond', friendsController.respondOnFriendshipRequest);
-router.post('/friendship/send/request/delete', friendsController.deletePendingFriendshipRequest);
+router.get('/suggestion', friendsController.friendSugesstion);
+router.get('/list', friendsController.getFriendshipList);
+router.post('/send/request', friendsController.sendFriendshipRequest);
+router.post('/send/request/respond', friendsController.respondOnFriendshipRequest);
+router.post('/send/request/delete', friendsController.deletePendingFriendshipRequest);
 
-export default router;
+export {router as friendsRouter};

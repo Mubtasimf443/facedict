@@ -33,7 +33,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon src/index.ts",
+    "dev": "nodemon --watch src/index.ts --exec ts-node src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
     "makemigrations": "npx drizzle-kit generate",

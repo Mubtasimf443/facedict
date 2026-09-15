@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  reactStrictMode : false,
   images:{
     remotePatterns : [ 
       {
@@ -31,6 +31,12 @@ const nextConfig: NextConfig = {
       {
         protocol : 'https',
         hostname : "placehold.co",
+        port : '',
+        pathname : '/**'
+      },
+      {
+        protocol : 'http',
+        hostname : "res.cloudinary.com",
         port : '',
         pathname : '/**'
       },
