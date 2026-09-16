@@ -5,8 +5,8 @@ import z from "zod";
 export default class friendshipService {
     static validateFriendshipRequestData(data : object) {
         let schema =z.object({
-            from : z.number(),
-            to : z.number(),
+            from : z.number().int().nonnegative(),
+            to : z.number().int().nonnegative(),
         });
         return schema.safeParse(data);
     }

@@ -9,7 +9,7 @@ import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
 import cors from 'cors'
 import db from "./config/db";
-import { postTables, usersTable } from "./drizzle/schema";
+import { friendshipRequestTable, postTables, usersTable } from "./drizzle/schema";
 import { profileRouter } from "./routes/profile.route";
 import { count, eq } from "drizzle-orm";
 import { friendsRouter } from "./routes/friendship.route";
@@ -23,7 +23,7 @@ app.use(
   })
 );
 // console.log(db.select().from(usersTable).then(data => console.log({interest : data[1].interest, id : data[1].id})));
-// console.log(db.delete(usersTable).where(eq(usersTable.id, 7)).then(data => console.log(data)));
+// console.log(db.delete(friendshipRequestTable).then(data => console.log(data)));
 
 app.use(morgan('dev'));
 app.use(express.json());

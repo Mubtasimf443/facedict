@@ -2,6 +2,7 @@
 "use client"
 
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/shadcn/pagination";
+import { TabsList, Tabs, TabsTrigger, TabsContent } from "@/components/shadcn/tabs";
 import { toast } from "@/components/shadcn/toast";
 import Friends from "@/components/ui/Friends"
 import { useSearchParams } from "next/navigation";
@@ -14,26 +15,26 @@ interface IFriends {
     avatar: string;
 }
 export default function page() {
-    let searchParams=useSearchParams();
+    let searchParams = useSearchParams();
     let [currentPage, setCurrentPage] = useState<number>(
-        !isNaN(Number(searchParams.get('page') )) ? Number(searchParams.get('page') ) : 0 
+        !isNaN(Number(searchParams.get('page'))) ? Number(searchParams.get('page')) : 0
     );
     let [totalPages, setTotalPages] = useState<number>(1);
     let [friends, setFriends] = useState<IFriends[]>([]);
-    let [isInitialRender, setIsInitialRender]= useState(true);
+    let [isInitialRender, setIsInitialRender] = useState(true);
     useEffect(() => {
         async function LoadFriends() {
             try {
                 let response = await fetch(process.env.NEXT_PUBLIC_SERVER_URL! + `/api/friends/suggestion?page=${currentPage}&giveTotalPage=${isInitialRender ? 'yes' : 'no'}`, {
-                    credentials : 'include',
-                    cache : 'no-cache'
+                    credentials: 'include',
+                    cache: 'no-cache'
                 });
                 let jsonResponse = await response.json();
                 setFriends(jsonResponse.data.suggestedUser);
                 !!jsonResponse.data.totalPages && setTotalPages(jsonResponse.data.totalPages);
             } catch (error) {
                 console.error(error);
-                toast.add({ title : 'Failed to load Friends Suggestion'})
+                toast.add({ title: 'Failed to load Friends Suggestion' })
             } finally {
                 setIsInitialRender(false);
             }
@@ -41,43 +42,51 @@ export default function page() {
         LoadFriends();
     }, [currentPage])
     return (
-        <div className="flex flex-col justify-start items-center w-full gap-5">
-            <div className="flex flex-col justify-start items-center gap-y-2 w-full max-w-lg">
-                {friends.map((friend, index) =>
-                    <Friends
-                        key={index}
-                        userImageSrc={friend.avatar}
-                        userImageAlt='User Image'
-                        userName={friend.name}
-                        userId={friend.id}
-                    />
-                )}
-            </div>
-            {totalPages > 1 &&
-                <Pagination>
-                    <PaginationContent>
-                        {currentPage > 1 &&
-                            <PaginationItem>
-                                <PaginationPrevious href={`/friends?page=${currentPage -1}`} />
-                            </PaginationItem>
-                        }
-                        {Array.from({ length: totalPages }, (_, index) => index).map(num =>
-                            <PaginationItem >
-                                <PaginationLink href={`/friends?page=${num}`} isActive={num === currentPage}>1</PaginationLink>
-                            </PaginationItem>
-                        )}
+        <div className="flex flex-col justify-start items-center w-full gap-5 py-5">
+            <Tabs defaultValue="overview" className="w-full max-w-lg">
+                <TabsList>
+                    <TabsTrigger value="requested">Requested</TabsTrigger>
+                    <TabsTrigger value="suggested">Suggested</TabsTrigger>
 
-                        
-                        {
-                            currentPage < totalPages &&
-                            <PaginationItem>
-                                <PaginationNext href={`/friends?page=${currentPage + 1}`} />
-                            </PaginationItem>
-                        }
-                       
-                    </PaginationContent>
-                </Pagination>
-            }
+                </TabsList>
+                <TabsContent value={'requested'} ></TabsContent>
+                <TabsContent value={'suggested'} className="flex flex-col justify-start items-center gap-y-2 w-full max-w-lg" >
+                    {friends.map((friend, index) =>
+                        <Friends
+                            key={index}
+                            userImageSrc={friend.avatar}
+                            userImageAlt='User Image'
+                            userName={friend.name}
+                            userId={friend.id}
+                        />
+                    )}
+                    {totalPages > 1 &&
+                        <Pagination>
+                            <PaginationContent>
+                                {currentPage > 1 &&
+                                    <PaginationItem>
+                                        <PaginationPrevious href={`/friends?page=${currentPage - 1}`} />
+                                    </PaginationItem>
+                                }
+                                {Array.from({ length: totalPages }, (_, index) => index).map(num =>
+                                    <PaginationItem >
+                                        <PaginationLink href={`/friends?page=${num}`} isActive={num === currentPage}>1</PaginationLink>
+                                    </PaginationItem>
+                                )}
+
+
+                                {
+                                    currentPage < totalPages &&
+                                    <PaginationItem>
+                                        <PaginationNext href={`/friends?page=${currentPage + 1}`} />
+                                    </PaginationItem>
+                                }
+
+                            </PaginationContent>
+                        </Pagination>
+                    }
+                </TabsContent>
+            </Tabs>
         </div>
     )
 }

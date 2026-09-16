@@ -86,7 +86,6 @@ export default class friendsController {
             return res.status(500).json({ error, success: false, data: null })
         }
     }
-
     
     static async sendFriendshipRequest(req: Request, res: Response): Promise<Response> {
         try {
@@ -115,7 +114,7 @@ export default class friendsController {
                 );
 
             if (isFriends.length === 1) {
-                return res.status(200).json({ data: { message: 'You both are friends' , error : null , success : true } })
+                return res.status(200).json({ data: { message: 'You both are friends', friendshipStatus : 'Friends' }, error: null, success: true })
             }
             let pendingRequest = await db.select().from(friendshipRequestTable)
                 .where(
@@ -153,7 +152,8 @@ export default class friendsController {
                 return res.status(200).json({
                     success: true,
                     data: {
-                        message: 'friendship request accapted'
+                        message: 'friendship request accapted',
+                        friendshipStatus : 'Friends'
                     },
                     error: null
                 })
@@ -170,7 +170,7 @@ export default class friendsController {
                     )
                 );
             if (isRequestedBefore.length === 1) {
-                return res.status(400).json({ data: { message: 'You have requested before' }, error: null, success: true })
+                return res.status(200).json({ data: { message: 'You have requested before', friendshipStatus: 'Requested' }, error: null, success: true })
             }
             await db.insert(friendshipRequestTable).values({
                 from: data.from,
@@ -178,7 +178,7 @@ export default class friendsController {
                 status: 'pending',
             })
             
-            return res.status(200).json({ data: { message: 'Friendship request send' }, error: null, success: true })
+            return res.status(200).json({ data: { message: 'Friendship request send', friendshipStatus : 'Requested'   }, error: null, success: true })
         } catch (error) {
             console.error(error);
             return res.status(500).json({ error, success: false, data: null })
@@ -265,7 +265,7 @@ export default class friendsController {
                     )
                 )
                 .limit(1)
-            return res.status(200).json({})
+            return res.status(200).json({ success: true, data: null, error: null })
         } catch (error) {
             console.error(error);
             return res.status(500).json({ error, success: false, data: null })
@@ -323,6 +323,61 @@ export default class friendsController {
             }
 
             return res.status(200).json({ error: null, success: false, data: { friends, following, followers } })
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({ error, success: false, data: null })
+        }
+    }
+
+    static async unfriendUser(req: Request, res: Response){
+        try {
+            let rasult = friendshipService.validateFriendshipRequestData({ from: req.user_id, to: req.body.to });
+            if (rasult.error) {
+                return res.status(400).json({ error : rasult.error})
+            };
+           
+            let users = await db
+                .select({ friends: usersTable.friends })
+                .from(usersTable)
+                .where(
+                    inArray(usersTable.id, [rasult.data.from, rasult.data.to])
+                );
+            if (users.length != 2 ) {
+                return res.status(400).json({ success : false , data : null , error : { message : 'One of the friend is deleted'}});
+            }
+            await db
+                .update(usersTable)
+                .set({ friends: users[0].friends!.filter(f => f !== rasult.data.to) })
+                .where(
+                    eq(usersTable.id, rasult.data.from)
+                )
+                .limit(1);
+
+            await db
+                .update(usersTable)
+                .set({ friends: users[1].friends!.filter(f => f !== rasult.data.from) })
+                .where(
+                    eq(usersTable.id, rasult.data.to)
+                )
+                .limit(1);
+
+            await db
+                .delete(friendshipRequestTable)
+                .where(
+                    or(
+                        and(
+                            eq(friendshipRequestTable.from, rasult.data.from),
+                            eq(friendshipRequestTable.to, rasult.data.to),
+                            eq(friendshipRequestTable.status, 'confirmed')
+                        ),
+                        and(
+                            eq(friendshipRequestTable.from, rasult.data.to),
+                            eq(friendshipRequestTable.to, rasult.data.from),
+                            eq(friendshipRequestTable.status, 'confirmed')
+                        ),
+                    )
+                );
+            return res.status(200).json({ success: true, error: null, data: null })
         } catch (error) {
             console.error(error);
             return res.status(500).json({ error, success: false, data: null })
