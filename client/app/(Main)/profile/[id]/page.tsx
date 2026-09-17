@@ -15,6 +15,7 @@ import {  useSearchParams } from "next/navigation";
 import LikesTab from "@/features/profile/Tabs/LikesTab";
 import { IUser } from "@/features/profile/userProfile.types";
 import MediaTab from "@/features/profile/Tabs/MediaTab";
+import FriendsTab from "@/features/profile/Tabs/FriendsTab";
 
 
 
@@ -82,7 +83,10 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
     <div className="w-full flex flex-row justify-center item-start">
       <div className="flex flex-col justify-start items-start w-full max-w-5xl   pb-24">
         {/* ============ COVER IMAGE ============ */}
-        <CoverImage name={user!.name} coverImageUrl={user.coverImage || 'https://placehold.co/400x400/cccccc/cccccc'} />
+        <CoverImage 
+        name={user!.name} 
+        coverImageUrl={user.coverImage || 'https://placehold.co/400x400/cccccc/cccccc'} 
+        />
 
         {/* ============ PROFILE HEADER ============ */}
         <div className="pt-4 px-4 sm:px-6 w-full">
@@ -136,7 +140,8 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
 
             {/* actions */}
             <div className="mt-4 flex flex-row flex-wrap items-center gap-2 sm:mt-0 sm:pb-2">
-              <EditProfileBtn />
+              {user.isDefaultUserId && <EditProfileBtn />}
+              
               <ShareProfileBtn />
             </div>
           </div>
@@ -187,6 +192,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
             </TabsList>
 
             <AboutTab
+              isDefaultUserId={user.isDefaultUserId}
               education={user.education}
               religion={user.religion}
               job={user.job}
@@ -207,22 +213,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
 
             <MediaTab userId={user.id} />
 
-            {/* <TabsContent value={'friends'} className={'w-full mt-5'} >
-              {user.friends.length === 0 && "No Friends Yet"}
-              <div className="flex flex-row justify-start items-start gap-3">
-                {user.friends.map(({ name, image }) =>
-                  <Card className="shadow-sm">
-                    <CardContent className="flex flex-col justify-start items-center gap-y-2">
-                      <Avatar>
-                        <AvatarImage src={image} alt="Friend" />
-                        <AvatarFallback>{name.split(' ').map(str => str[0]).join('')}</AvatarFallback>
-                      </Avatar>
-                      <h3 className="text-md">{name}</h3>
-                    </CardContent>
-                  </Card>
-                )}
-              </div>
-            </TabsContent> */}
+            <FriendsTab userId={user.id} isDefaultUserId={user.isDefaultUserId} />
           </Tabs>
         </div>
 

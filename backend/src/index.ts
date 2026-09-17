@@ -22,7 +22,7 @@ app.use(
     credentials: true,
   })
 );
-// console.log(db.select().from(usersTable).then(data => console.log({interest : data[1].interest, id : data[1].id})));
+// console.log(db.update(usersTable).set({ friends: [], following: [], followers: [] }).then(data => console.log(data)));
 // console.log(db.delete(friendshipRequestTable).then(data => console.log(data)));
 
 app.use(morgan('dev'));

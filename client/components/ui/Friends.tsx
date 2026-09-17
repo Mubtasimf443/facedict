@@ -1,6 +1,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/shadcn/avatar'
 import React, { useState } from 'react'
 import { toast } from '../shadcn/toast';
+import { useRouter } from 'next/navigation';
 
 type requestStatusType = 'NotRequested' | 'Requested' | 'Friends';
 
@@ -14,6 +15,8 @@ interface IProps {
 const Friends = ({ userName, userImageSrc, userImageAlt, userId, friendshipStatus = 'NotRequested' }: IProps) => {
     let [fStatus, setFStatus] = useState<requestStatusType>(friendshipStatus);
     let [isRequesting, setIsRequesting] = useState<boolean>(false);
+    const router = useRouter();
+   
     async function sendFriendRequest() {
         try {
             setIsRequesting(true);
@@ -91,12 +94,12 @@ const Friends = ({ userName, userImageSrc, userImageAlt, userId, friendshipStatu
     return (
         <div className="flex flex-row justify-between item-center w-full p-3">
             <div className="flex flex-row justify-start items-center gap-x-3">
-                <Avatar >
+                <Avatar onClick={() => router.push('/profile/' + userId)}>
                     <AvatarImage
                         src={userImageSrc}
                         alt={userImageAlt}
                     />
-                    <AvatarFallback>UI</AvatarFallback>
+                    <AvatarFallback>{userName.split(' ').map(el => el[0]).filter((el, index) => index < 2).join('')}</AvatarFallback>
                 </Avatar>
                 <span>{userName}</span>
             </div>

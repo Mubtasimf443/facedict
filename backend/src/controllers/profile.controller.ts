@@ -3,27 +3,27 @@
 import { Request, Response } from "express";
 import ProfileService from "../services/profile.service";
 import db from "../config/db";
-import { postTables, usersTable } from "../drizzle/schema";
-import { count, eq } from "drizzle-orm";
+import { friendshipRequestTable as fTable, postTables, usersTable } from "../drizzle/schema";
+import { count, eq, inArray } from "drizzle-orm";
 import z from "zod";
 
 export default class ProfileController {
-    static async updateProfileInfo(req : Request, res : Response) {
+    static async updateProfileInfo(req: Request, res: Response) {
         try {
             let { data: result, error, success } = await ProfileService.validateProfileInfo(req.body);
-            
+
         } catch (error) {
             console.error(error);
             return res.status(500).json({ error, data: null, success: false })
         }
     }
-    static async addUserEducation(req : Request, res : Response) {
+    static async addUserEducation(req: Request, res: Response) {
         try {
-            let validationResult =ProfileService.validateEducation(req.body);
+            let validationResult = ProfileService.validateEducation(req.body);
             if (validationResult.error || !validationResult.data) {
                 return res.status(400).json({ error: JSON.parse(validationResult.error.message), data: null, success: false })
             }
-            let user =(await db
+            let user = (await db
                 .select({ education: usersTable.education })
                 .from(usersTable)
                 .where(eq(usersTable.id, req.user_id!))
@@ -32,7 +32,7 @@ export default class ProfileController {
                 await db
                     .update(usersTable)
                     .set({ education: [validationResult.data] })
-                    .where(eq(usersTable, req.user_id!))
+                    .where(eq(usersTable.id, req.user_id!))
                     .limit(1);
                 return res.status(200).json({ success: true, data: null, error: null })
             }
@@ -42,7 +42,7 @@ export default class ProfileController {
                 await db
                     .update(usersTable)
                     .set({ education: [...user.education, validationResult.data] })
-                    .where(eq(usersTable, req.user_id!))
+                    .where(eq(usersTable.id, req.user_id!))
                     .limit(1);
                 return res.status(200).json({ success: true, data: null, error: null })
             }
@@ -51,7 +51,30 @@ export default class ProfileController {
             return res.status(500).json({ error, data: null, success: false })
         }
     }
-    static async getUserData(req : Request, res : Response) {
+    static async addUserJobHistory(req: Request, res: Response) {
+        try {
+            let validationResult = ProfileService.validateJobHistory(req.body);
+            if (validationResult.error || !validationResult.data) {
+                return res.status(400).json({ success: false, error: validationResult.error, data: null });
+            }
+            let job = (await db
+                .select({ job: usersTable.job })
+                .from(usersTable)
+                .where(eq(usersTable.id, req.user_id!))
+                .limit(1))[0].job;
+            if (!!job!.find(el => el.title === validationResult.data.title && el.company === validationResult.data.company)) {
+                return res.status(400).json({ error: { message: 'Same job title in same company is not allowed 2 times' } })
+            }
+            job!.push(validationResult.data);
+            await db.update(usersTable).set({ job }).where(eq(usersTable.id, req.user_id!));
+
+            return res.status(200).json({ success: true, data: null, error: null });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ error, data: null, success: false })
+        }
+    }
+    static async getUserData(req: Request, res: Response) {
         try {
             let id = req.params.id;
             if (!id || isNaN(Number(id))) return res.status(400).json({ error: { message: 'User ID is invalid' }, success: false, data: null });
@@ -80,10 +103,10 @@ export default class ProfileController {
                 .from(usersTable)
                 .where(eq(usersTable.id, Number(id)))
                 .limit(1);
-            if (users.length === 0) return res.status(404).json({  error: { message: 'No Users exist by this id' }, success: false, data: null });
+            if (users.length === 0) return res.status(404).json({ error: { message: 'No Users exist by this id' }, success: false, data: null });
             let postsCount = (await db.select({ postCount: count() }).from(postTables).where(eq(postTables.author, Number(id))))[0].postCount;
             return res.status(200).json({
-                isDefaultUserId : id == String(req.user_id!),
+                isDefaultUserId: id == String(req.user_id!),
                 postsCount,
                 ...users[0]
             })
@@ -92,36 +115,62 @@ export default class ProfileController {
             return res.status(500).json({ error, data: null, success: false })
         }
     }
-    static async getUserUplaodedPost(req : Request, res : Response) {
+    static async getUserUploadedPost(req: Request, res: Response) {
         try {
             let page = z.number().int().optional().default(0).parse(Number(req.query.page));
             let postCount = (await db
                 .select({ count: count() })
                 .from(postTables)
                 .where(eq(usersTable.id, req.user_id!)))[0].count;
-            
-            let totalPages = Math.floor(postCount/10);
+
+            let totalPages = Math.floor(postCount / 10);
             let post = await db
                 .select({
-                    caption : postTables.caption,
-                    images : postTables.images,
-                    id : postTables.id,
-                    likes : postTables.likes,
-                    comments : postTables.comments
+                    caption: postTables.caption,
+                    images: postTables.images,
+                    id: postTables.id,
+                    likes: postTables.likes,
+                    comments: postTables.comments
                 })
                 .from(postTables)
                 .where(eq(postTables.author, req.user_id!))
                 .limit(10)
-                .offset(page < totalPages ? page * 10 : (totalPages -1) * 10);
+                .offset(page < totalPages ? page * 10 : (totalPages - 1) * 10);
 
-            return res.status(200).json({ 
+            return res.status(200).json({
                 totalPages: postCount / 10,
-                currentPage: page < totalPages ? page : totalPages ,
+                currentPage: page < totalPages ? page : totalPages,
                 post
             });
         } catch (error) {
             console.error(error);
             return res.status(500).json({ error, data: null, success: false })
+        }
+    }
+    static async getUserFriendsList(req: Request, res: Response) {
+        try {
+            let userId = z.number().int().nonnegative().parse(Number(req.query.userId));
+            let friendsIds = (await db
+                .select({ friends: usersTable.friends })
+                .from(usersTable)
+                .where(eq(usersTable.id, userId))
+                .limit(1))[0].friends;
+
+            let users = await db
+                .select({
+                    name: usersTable.name,
+                    image: usersTable.avatar,
+                    id: usersTable.id
+                })
+                .from(usersTable)
+                .where(
+                    inArray(usersTable.id, friendsIds!)
+                );
+
+            return res.status(200).json({ data: { friends: users }, success: true, error: null })
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({ data: null, success: false, error })
         }
     }
 }

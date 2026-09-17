@@ -8,6 +8,7 @@ const router =Router();
 
 router.use(userMiddleWare)
 router.get('/suggestion', friendsController.friendSugesstion);
+router.get('/friend_request', friendsController.friendRequest);
 router.get('/list', friendsController.getFriendshipList);
 router.post('/send/request', friendsController.sendFriendshipRequest);
 router.post('/send/request/respond', friendsController.respondOnFriendshipRequest);

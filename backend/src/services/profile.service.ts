@@ -1,6 +1,7 @@
 /* بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيْمِ ﷺ InshaAllah */
 
 import z from "zod";
+import { industryTypes } from "../types/auth.types";
 
 export default class ProfileService {
     static validateProfileInfo(data: any) {
@@ -64,7 +65,7 @@ export default class ProfileService {
         });
         return schema.safeParse(data)
     }
-    static validateEducation(data:any) {
+    static validateEducation(data: any) {
         let schema = z.object({
             institution: z.string().max(255),
             degree: z.string().max(255),
@@ -72,5 +73,23 @@ export default class ProfileService {
             endYear: z.number().min(new Date().getFullYear() - 90).max(new Date().getFullYear())
         });
         return schema.safeParse(data)
+    }
+    static validateJobHistory(data: any) {
+
+        const dateSchema = z.object({
+            day: z.number().int().min(1).max(31),
+            month: z.number().int().min(1).max(12),
+            year: z.number().int().nonnegative().min(new Date().getFullYear() - 100).max(new Date().getFullYear() - 1),
+        });
+
+        const jobEntrySchema = z.object({
+            title: z.string().min(5).max(80),
+            industry_type: z.enum(industryTypes),
+            company: z.string().min(5).max(120),
+            startDate: dateSchema,
+            endDate: dateSchema,
+        });
+
+        return jobEntrySchema.safeParse(data);
     }
 }

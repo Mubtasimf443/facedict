@@ -31,7 +31,10 @@ export default function AddEducationDialog() {
             });
             if (response.status ===200) {
                 setIsDialogOpen(false);
-                toast.add({ title : 'The Education level was added successfully'})
+                toast.add({ title : 'The Education level was added successfully'});
+                setTimeout(() => {
+                    window.location.reload();
+                }, 3000);
             } else {
                 setErrorMsg('Failed to add Education');
                 setTimeout(() => { setErrorMsg('') }, 5000);

@@ -5,6 +5,7 @@ import { Combobox, ComboboxContent, ComboboxEmpty, ComboboxInput, ComboboxItem, 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/shadcn/dialog'
 import { Field, FieldDescription, FieldLabel } from '@/components/shadcn/field';
 import { Input } from '@/components/shadcn/input';
+import { toast } from '@/components/shadcn/toast';
 import { industryTypes } from '@/data/industryTypes';
 import { XIcon } from 'lucide-react';
 import React, { SubmitEvent, useEffect, useState } from 'react'
@@ -21,17 +22,44 @@ export default function AddJobHistoryDialog() {
         try {
             event.preventDefault();
             setIsFormDisabled(true);
-           
+            let response = await fetch(process.env.NEXT_PUBLIC_SERVER_URL! + '/api/profile/add-job' , {
+                method : 'POST',
+                headers : { 'content-type' : 'application/json'},
+                credentials : 'include',
+                cache : 'no-cache',
+                body: JSON.stringify({
+                    title: title ,
+                    company : company,
+                    industry_type : industryType,
+                    startDate : {
+                        day : startDateTime![0],
+                        month : startDateTime![1],
+                        year : startDateTime![2],
+                    },
+                    endDate : {
+                        day : endDateTime![0],
+                        month : endDateTime![1],
+                        year : endDateTime![2],
+                    }
+                })
+            });
+            if (response.status === 200) {
+                toast.add({ title : 'Job History Added SuccessFully'});
+                setTimeout(() => {
+                    window.location.reload();
+                }, 3000);
+            } else {
+                toast.add({ title: 'failed to add job history' })
+            }
         } catch (error) {
             console.error({ error });
+            toast.add({ title : 'failed to add job history'})
         } finally {
             setIsFormDisabled(false);
             setIsDialogOpen(false);
         }
     }
-    useEffect(() => {
-        console.log({startDateTime, endDateTime, industryType});
-    }, [startDateTime , endDateTime, industryType])
+    
     return (
         <Dialog open={isDialogOpen}>
             <DialogTrigger

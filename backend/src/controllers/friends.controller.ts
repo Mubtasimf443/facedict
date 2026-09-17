@@ -3,9 +3,11 @@
 import { Request, Response } from "express";
 import friendshipService from "../services/friendship.service";
 import db from "../config/db";
-import { friendshipRequestTable , usersTable } from "../drizzle/schema";
-import { and, count, eq, inArray, notInArray, or, sql } from "drizzle-orm";
+import { friendshipRequestTable as fTable , usersTable } from "../drizzle/schema";
+import { and, count, desc, eq, inArray, notInArray, or, sql } from "drizzle-orm";
 import z from "zod";
+
+
 
 export default class friendsController {
     static async friendSugesstion(req: Request, res: Response) {
@@ -23,12 +25,12 @@ export default class friendsController {
                 .where(eq(usersTable.id, req.user_id!)).limit(1))[0];
 
             let pendingFriendRequest = (await db
-                .select({ to : friendshipRequestTable.to})
-                .from(friendshipRequestTable)
+                .select({ to : fTable.to})
+                .from(fTable)
                 .where(
                     and(
-                        eq(friendshipRequestTable.from, req.user_id!),
-                        eq(friendshipRequestTable.status, 'pending'),
+                        eq(fTable.from, req.user_id!),
+                        eq(fTable.status, 'pending'),
                     )
                 ))
                 .map(({to}) => to);
@@ -38,7 +40,7 @@ export default class friendsController {
             for (let i = 0; i < userAccount.followers!.length; i++) !excludeUserIds.includes(userAccount.followers![i]) && excludeUserIds.push(userAccount.followers![i]);
             for (let i = 0; i < userAccount.following!.length; i++) !excludeUserIds.includes(userAccount.following![i]) && excludeUserIds.push(userAccount.following![i]);
             for (let i = 0; i < pendingFriendRequest!.length; i++) !excludeUserIds.includes(pendingFriendRequest![i]) && excludeUserIds.push(pendingFriendRequest![i]);
-            
+            excludeUserIds.push(req.user_id!);
             let suggestedUserCount: undefined | number;
             if (giveTotalPage === 'yes') {
                 suggestedUserCount = (await db
@@ -67,6 +69,7 @@ export default class friendsController {
                         sql`JSON_OVERLAPS(${usersTable.interest}, ${JSON.stringify(userAccount.interest)})`
                     )
                 )
+                .orderBy(desc(usersTable.createdAt))
                 .offset(page * 25)
                 .limit(25);
             let totalPages = undefined;
@@ -87,28 +90,53 @@ export default class friendsController {
         }
     }
     
+    static async friendRequest(req: Request, res: Response) {
+        try {
+            let requests = await db
+                .select({
+                    request_id : fTable.id,
+                    userId : usersTable.id,
+                    userName: usersTable.name,
+                    userImage: usersTable.avatar,
+                })
+                .from(fTable)
+                .where(
+                    and(
+                        eq(fTable.to, req.user_id!),
+                        eq(fTable.status, 'pending')
+                    )
+                )
+                .orderBy(desc(fTable.createdAt))
+                .leftJoin(usersTable, eq(fTable.from, usersTable.id));
+            return res.status(200).json({ data: { requests }, success: true, error: null })
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({ error, data: null, success: false })
+        }
+    }
+
     static async sendFriendshipRequest(req: Request, res: Response): Promise<Response> {
         try {
 
-            let { data, error } = friendshipService.validateFriendshipRequestData({ from: Number(req.user_id), to: req.body.to })
+            let { data, error } = friendshipService.validateFriendshipRequestData({ from: req.user_id!, to: req.body.to })
             if (!data || error) {
                 return res.status(401).json({ error: { message: 'Please give bearer access token' }, success: false, data: null });
             }
             if (data.from === data.to) {
                 return res.status(400).json({ error: { message: "You can't send a friend request to yourself" }, success: false, data: null });
             }
-            let isFriends = await db.select().from(friendshipRequestTable)
+            let isFriends = await db.select().from(fTable)
                 .where(
                     or(
                         and(
-                            eq(friendshipRequestTable.from, data.from),
-                            eq(friendshipRequestTable.to, data.to),
-                            eq(friendshipRequestTable.status, 'confirmed')
+                            eq(fTable.from, data.from),
+                            eq(fTable.to, data.to),
+                            eq(fTable.status, 'confirmed')
                         ),
                         and(
-                            eq(friendshipRequestTable.from, data.to),
-                            eq(friendshipRequestTable.to, data.from),
-                            eq(friendshipRequestTable.status, 'confirmed')
+                            eq(fTable.from, data.to),
+                            eq(fTable.to, data.from),
+                            eq(fTable.status, 'confirmed')
                         ),
                     )
                 );
@@ -116,37 +144,37 @@ export default class friendsController {
             if (isFriends.length === 1) {
                 return res.status(200).json({ data: { message: 'You both are friends', friendshipStatus : 'Friends' }, error: null, success: true })
             }
-            let pendingRequest = await db.select().from(friendshipRequestTable)
+            let pendingRequest = await db.select().from(fTable)
                 .where(
                     and(
-                        eq(friendshipRequestTable.from, data.to),
-                        eq(friendshipRequestTable.to, data.from),
+                        eq(fTable.from, data.to),
+                        eq(fTable.to, data.from),
                         or(
-                            eq(friendshipRequestTable.status, 'pending'),
-                            eq(friendshipRequestTable.status, 'declined'),
+                            eq(fTable.status, 'pending'),
+                            eq(fTable.status, 'declined'),
                         )
                     )
                 );
             if (pendingRequest.length === 1) {
-                await db.update(friendshipRequestTable)
+                await db.update(fTable)
                     .set({ status: 'confirmed', from: data.from, to: data.to })
                     .where(
                         and(
-                            eq(friendshipRequestTable.from, data.to),
-                            eq(friendshipRequestTable.to, data.from),
+                            eq(fTable.from, data.to),
+                            eq(fTable.to, data.from),
                             or(
-                                eq(friendshipRequestTable.status, 'pending'),
-                                eq(friendshipRequestTable.status, 'declined')
+                                eq(fTable.status, 'pending'),
+                                eq(fTable.status, 'declined')
                             )
                         )
                     );
 
                 await db.update(usersTable)
-                    .set({ friends: sql`JSON_ARRAY_APPEND(${usersTable.friends}, $ ,${data.to}` })
+                    .set({ friends: sql`JSON_ARRAY_APPEND(${usersTable.friends},'$',${data.to}` })
                     .where(eq(usersTable.id, data.from));
 
                 await db.update(usersTable)
-                    .set({ friends: sql`JSON_ARRAY_APPEND(${usersTable.friends}, $ ,${data.from}` })
+                    .set({ friends: sql`JSON_ARRAY_APPEND(${usersTable.friends}, '$',${data.from}` })
                     .where(eq(usersTable.id, data.to));
 
                 return res.status(200).json({
@@ -158,21 +186,21 @@ export default class friendsController {
                     error: null
                 })
             }
-            let isRequestedBefore = await db.select().from(friendshipRequestTable)
+            let isRequestedBefore = await db.select().from(fTable)
                 .where(
                     and(
-                        eq(friendshipRequestTable.from , data.from),
-                        eq(friendshipRequestTable.to , data.to),
+                        eq(fTable.from , data.from),
+                        eq(fTable.to , data.to),
                         or(
-                            eq(friendshipRequestTable.status , 'declined'),
-                            eq(friendshipRequestTable.status , "pending"),
+                            eq(fTable.status , 'declined'),
+                            eq(fTable.status , "pending"),
                         )
                     )
                 );
             if (isRequestedBefore.length === 1) {
                 return res.status(200).json({ data: { message: 'You have requested before', friendshipStatus: 'Requested' }, error: null, success: true })
             }
-            await db.insert(friendshipRequestTable).values({
+            await db.insert(fTable).values({
                 from: data.from,
                 to: data.to,
                 status: 'pending',
@@ -195,14 +223,14 @@ export default class friendsController {
             if (respond !== 'confirmed' && respond !== 'declined' ) {
                 return res.status(400).json({ error : { message : 'Please give a respond '}, data: null, success: false });
             }
-            await db.update(friendshipRequestTable)
+            await db.update(fTable)
                 .set({
                     status: respond
                 })
                 .where(
                     and(
-                        eq(friendshipRequestTable.from, data.from),
-                        eq(friendshipRequestTable.to, data.to),
+                        eq(fTable.from, data.from),
+                        eq(fTable.to, data.to),
                     )
                 )
                 .limit(1);
@@ -210,7 +238,7 @@ export default class friendsController {
             if (respond === 'confirmed') {
                 await db.update(usersTable)
                     .set({
-                        friends: sql`JSON_ARRAY_APPEND(${usersTable.friends}, $ , ${data.to} )`
+                        friends: sql`JSON_ARRAY_APPEND(${usersTable.friends}, '$', ${data.to} )`
                     })
                     .where(
                         eq(usersTable.id, data.from)
@@ -218,7 +246,7 @@ export default class friendsController {
                     .limit(1);
                 await db.update(usersTable)
                     .set({
-                        friends: sql`JSON_ARRAY_APPEND(${usersTable.friends}, $ , ${data.from} )`
+                        friends: sql`JSON_ARRAY_APPEND(${usersTable.friends}, '$', ${data.from} )`
                     })
                     .where(
                         eq(usersTable.id, data.to)
@@ -228,7 +256,7 @@ export default class friendsController {
             if (respond === 'declined') {
                 await db.update(usersTable)
                     .set({
-                        following: sql`JSON_ARRAY_APPEND(${usersTable.following}, $ ,${data.to}) `
+                        following: sql`JSON_ARRAY_APPEND(${usersTable.following}, '$',${data.to}) `
                     })
                     .where(
                         eq(usersTable.id, data.from)
@@ -236,7 +264,7 @@ export default class friendsController {
                     .limit(1);
                 await db.update(usersTable)
                     .set({
-                        followers: sql`JSON_ARRAY_APPEND(${usersTable.followers}, $ ,${data.from}) `
+                        followers: sql`JSON_ARRAY_APPEND(${usersTable.followers}, '$',${data.from}) `
                     })
                     .where(
                         eq(usersTable.id, data.to)
@@ -256,12 +284,12 @@ export default class friendsController {
             if (error || !data || !success) {
                 return res.status(400).json({ error, data: null, success: false });
             }
-            let friendRequest = await db.delete(friendshipRequestTable)
+            let friendRequest = await db.delete(fTable)
                 .where(
                     and(
-                        eq(friendshipRequestTable.from , data.from),
-                        eq(friendshipRequestTable.to, data.to),
-                        eq(friendshipRequestTable.status, 'pending')  
+                        eq(fTable.from , data.from),
+                        eq(fTable.to, data.to),
+                        eq(fTable.status, 'pending')  
                     )
                 )
                 .limit(1)
@@ -362,18 +390,18 @@ export default class friendsController {
                 .limit(1);
 
             await db
-                .delete(friendshipRequestTable)
+                .delete(fTable)
                 .where(
                     or(
                         and(
-                            eq(friendshipRequestTable.from, rasult.data.from),
-                            eq(friendshipRequestTable.to, rasult.data.to),
-                            eq(friendshipRequestTable.status, 'confirmed')
+                            eq(fTable.from, rasult.data.from),
+                            eq(fTable.to, rasult.data.to),
+                            eq(fTable.status, 'confirmed')
                         ),
                         and(
-                            eq(friendshipRequestTable.from, rasult.data.to),
-                            eq(friendshipRequestTable.to, rasult.data.from),
-                            eq(friendshipRequestTable.status, 'confirmed')
+                            eq(fTable.from, rasult.data.to),
+                            eq(fTable.to, rasult.data.from),
+                            eq(fTable.status, 'confirmed')
                         ),
                     )
                 );
