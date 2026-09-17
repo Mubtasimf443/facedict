@@ -11,7 +11,7 @@ import ShareProfileBtn from "@/features/profile/ShareProfileBtn";
 import { Calendar, Link2, MapPin, Pencil } from "lucide-react";
 import { useEffect, useState } from "react";
 import PostTab from "@/features/profile/Tabs/PostTab";
-import {  useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import LikesTab from "@/features/profile/Tabs/LikesTab";
 import { IUser } from "@/features/profile/userProfile.types";
 import MediaTab from "@/features/profile/Tabs/MediaTab";
@@ -56,7 +56,7 @@ const initialUser: IUser = {
 const CurrentTabList = ['about', 'posts', 'likes', 'media', 'friends'];
 export default function Page({ params }: { params: Promise<{ id: string }> }) {
   let searchParams = useSearchParams().get('tab') || ''
-  let currentTab =CurrentTabList.includes(searchParams ) ? searchParams : 'about';
+  let currentTab = CurrentTabList.includes(searchParams) ? searchParams : 'about';
   const [loading, setLoading] = useState<boolean>(true);
   const [loadingError, setLoadingError] = useState<string>('');
   const [user, setUser] = useState<IUser>(initialUser);
@@ -78,14 +78,14 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
 
   if (!!loadingError.trim()) return <div className=" w-full h-dvh p-4 text-red-700 text-xl">{loadingError}</div>;
   if (loading) return <Loader />;
-  
+
   return (
     <div className="w-full flex flex-row justify-center item-start">
       <div className="flex flex-col justify-start items-start w-full max-w-5xl   pb-24">
         {/* ============ COVER IMAGE ============ */}
-        <CoverImage 
-        name={user!.name} 
-        coverImageUrl={user.coverImage || 'https://placehold.co/400x400/cccccc/cccccc'} 
+        <CoverImage
+          name={user!.name}
+          coverImageUrl={user.coverImage || 'https://placehold.co/400x400/cccccc/cccccc'}
         />
 
         {/* ============ PROFILE HEADER ============ */}
@@ -140,8 +140,17 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
 
             {/* actions */}
             <div className="mt-4 flex flex-row flex-wrap items-center gap-2 sm:mt-0 sm:pb-2">
-              {user.isDefaultUserId && <EditProfileBtn />}
-              
+              {user.isDefaultUserId &&
+                <EditProfileBtn
+                  coverImage={user.coverImage || 'https://placehold.co/400x400/cccccc/cccccc'}
+                  avatar={user.avater || 'https://placehold.co/400x400/cccccc/cccccc'}
+                  name={user.name}
+                  bio={user.bio}
+                  location={{ city: user.location.city, country: user.location.country }}
+                  religion={user.religion}
+                  website={user.website}
+                />}
+
               <ShareProfileBtn />
             </div>
           </div>

@@ -11,5 +11,6 @@ router.get('/profie_details/:id', ProfileController.getUserData);
 router.get('/friends', ProfileController.getUserFriendsList);
 router.post('/add-education', ProfileController.addUserEducation);
 router.post('/add-job', ProfileController.addUserJobHistory);
+router.put('/info', ProfileController.updateProfileInfo);
 
 export { router as profileRouter };

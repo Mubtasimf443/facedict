@@ -11,7 +11,24 @@ export default class ProfileController {
     static async updateProfileInfo(req: Request, res: Response) {
         try {
             let { data: result, error, success } = await ProfileService.validateProfileInfo(req.body);
-
+            if (!result || error) {
+                return res.status(400).json({ error , success : false , data : null})
+            }
+            await db
+                .update(usersTable)
+                .set({
+                    name : result.name,
+                    bio: result.bio,
+                    avatar : result.avatar,
+                    coverImage : result.coverImage,
+                    website: result.website,
+                    religion : result.religion,
+                    about : result.about
+                    // location : { city : result.city , country: result.country,}
+                })
+                .where(eq(usersTable.id, req.user_id!))
+                .limit(1);
+            return res.status(200).json({ success: true, data: null, error: null })
         } catch (error) {
             console.error(error);
             return res.status(500).json({ error, data: null, success: false })

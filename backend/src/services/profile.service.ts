@@ -1,7 +1,7 @@
 /* بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيْمِ ﷺ InshaAllah */
 
 import z from "zod";
-import { industryTypes } from "../types/auth.types";
+import { countries, industryTypes, religions } from "../types/auth.types";
 
 export default class ProfileService {
     static validateProfileInfo(data: any) {
@@ -19,49 +19,37 @@ export default class ProfileService {
                 .optional()
                 .or(z.literal('')),
 
-            city: z
-                .string()
-                .trim()
-                .max(100, { message: "City must be at most 100 characters" })
-                .optional()
-                .or(z.literal('')),
+            // city: z
+            //     .string()
+            //     .trim()
+            //     .max(100, { message: "City must be at most 100 characters" }),
+                
+              
 
-            country: z
-                .string()
-                .trim()
-                .max(100, { message: "Country must be at most 100 characters" })
-                .optional()
-                .or(z.literal('')),
-
+            // country: z.enum(countries),
             website: z
                 .url({ message: "Please enter a valid URL" })
                 .max(300, { message: "Website URL must be at most 300 characters" })
                 .optional()
                 .or(z.literal('')),
 
-            religion: z
-                .string()
-                .trim()
-                .max(50, { message: "Religion must be at most 50 characters" })
-                .optional()
-                .or(z.literal('')),
+            religion: z.enum(religions),
 
             about: z
                 .string()
                 .trim()
-                .max(1000, { message: "About must be at most 1000 characters" })
-                .optional()
-                .or(z.literal('')),
+                .max(1200, { message: "About must be at most 1000 characters" })
+                .optional(),
+                
 
             coverImage: z
-                .url({ message: "Cover image must be a valid URL" })
-                .optional()
-                .or(z.literal('')),
-
-            profileImage: z
+                .url({ message: "Cover image must be a valid URL" }),
+                
+               
+            avatar: z
                 .url({ message: "Profile image must be a valid URL" })
-                .optional()
-                .or(z.literal(''))
+               
+                
         });
         return schema.safeParse(data)
     }

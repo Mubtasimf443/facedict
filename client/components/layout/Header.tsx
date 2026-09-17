@@ -13,8 +13,8 @@ export default function Header() {
   let avatar = useUserDetailsStore(state => state.avatar);
   let userId = useUserDetailsStore(state => state.id);
   const pathName = usePathname();
-
-
+  // console.log(useUserDetailsStore(s => s));
+  
   return (
     <header className='flex flex-row flex-wrap justify-between items-center gap-y-2 h-auto min-h-14 px-3 sm:px-5 py-2 shadow-md z-10'>
       <div className="flex flex-row justify-start items-center gap-x-3 sm:gap-x-4 md:gap-x-6 flex-wrap">

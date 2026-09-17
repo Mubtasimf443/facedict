@@ -159,7 +159,7 @@ export default class AuthController {
                     id :usersTable.id,
                     name: usersTable.name,
                     email: usersTable.email,
-                    avater: usersTable.avatar,
+                    avatar: usersTable.avatar,
                     coverImage: usersTable.coverImage,
                     bio: usersTable.bio,
                     about : usersTable.about,
