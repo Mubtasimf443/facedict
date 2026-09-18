@@ -4,11 +4,49 @@ import { Request, Response } from "express";
 import PostService from "../services/post.service";
 import db from "../config/db";
 import { postTables, usersTable } from "../drizzle/schema";
-import { and, eq, gte, sql } from "drizzle-orm";
+import { and, eq, gte, like, ne, sql } from "drizzle-orm";
 import { count } from "drizzle-orm";
 import z, { success } from "zod";
 
 export default class postController {
+    static async getSearchResult(req: Request, res : Response) {
+        try {
+            let query = z.string().min(2).max(120).trim().parse(req.query.query);
+            let friends = await db
+                .select({ 
+                    name: usersTable.name,
+                    id : usersTable.id,
+                    avatar : usersTable.avatar
+                })
+                .from(usersTable)
+                .where(
+                    like(usersTable.name, `%${query}%`),
+                );
+            let posts = await db
+                .select({
+                    id : postTables.id,
+                    caption : postTables.caption,
+                    images: postTables.images,
+                    likes : postTables.likes,
+                    comments: postTables.comments,
+                    createdAt: postTables.createdAt,
+                    author : postTables.author,
+                    userName : usersTable.name,
+                    userId: usersTable.id,
+                    userImage : usersTable.avatar
+                })
+                .from(postTables)
+                .where(
+                    sql`JSON_CONTAINS(${postTables.tags}, JSON_QUOTE(${query}))`
+                )
+                .leftJoin(usersTable, eq(postTables.author, usersTable.id));
+            return res.status(200).json({ data: { friends, posts }, error: null, success: true })
+            
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({ error, success: false, data: null })
+        }
+    }
     static async getFeed (req: Request, res : Response) :Promise<Response> {
         try {
             let page = z.number().int().nonnegative().default(0).parse(Number(req.query.page || 0));

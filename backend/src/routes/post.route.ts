@@ -13,5 +13,5 @@ router.get('/uploaded-posts/:userId', postController.getUserUplaodedPost);
 router.get('/liked-posts/:userId', postController.getLikedPost);
 router.post('/like/:postId', postController.likePost);
 router.get('/media/:userId', postController.getUserPostedMedia);
-
+router.get('/search', postController.getSearchResult)
 export default router;

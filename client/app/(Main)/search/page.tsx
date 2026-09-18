@@ -13,24 +13,71 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/shadcn/avatar'
 import Friends from '@/components/ui/Friends'
 import { samplePosts } from '@/data/samplePost'
 import Post from '@/components/ui/Post'
+import { toast } from '@/components/shadcn/toast'
+import { useUserDetailsStore } from '@/lib/userDetailsStore'
 
-
+interface IFriend {
+    name: string
+    id: number,
+    avatar: string
+}
+interface IPost {
+    id: number
+    caption: string,
+    images: string[],
+    likes: {
+        userId: number
+        time: Date
+        userName: string
+    }[],
+    comments: {
+        userId: number,
+        userName: string,
+        userImage: string;
+        message: string,
+        time: Date
+    }[],
+    createdAt: Date
+    author: number,
+    userName: string
+    userId: number
+    userImage: string
+}
+type TabValueType = 'All' | 'Friends' | 'Posts';
 
 export default function Page() {
+    let [tabValue, setTabValue]= useState<TabValueType>('All');
     let [query, setQuery] = useState<string>('');
     let [searchHistory, setSearchHistory] = useState<string[]>([]);
     let [isSearched, setIsSearched] = useState<boolean>(false);
     let [isSearching, setIsSearching] = useState<boolean>(false);
     let [isInitialRender, setIsInitialRender] = useState<boolean>(true);
-
-
+    let [posts, setPosts] = useState<IPost[]>([]);
+    let [friends, setFriends] = useState<IFriend[]>([]);
+    let userId= useUserDetailsStore(state => state.id);
     async function handleSearchFormSubmit(event?: SubmitEvent<HTMLFormElement>) {
         try {
             !!event && event.preventDefault();
-            setIsSearched(true);
+
             setIsSearching(true)
             if (!searchHistory.find(element => element.trim() === query.trim())) setSearchHistory(prev => [query, ...prev]);
+            let searhParams = new URLSearchParams();
+            searhParams.append('query', query)
+            let response = await fetch(process.env.NEXT_PUBLIC_SERVER_URL! + '/api/post/search?' + searhParams.toString(), {
+                credentials: 'include',
+                cache: 'no-cache'
+            });
+            if (response.status === 200) {
+                let { data } = await response.json();
+                setFriends(data.friends);
+                setPosts(data.posts);
+                setIsSearched(true);
+            } else {
+                console.log(await response.json());
+                toast.add({ title: 'Failed to search' })
+            }
         } catch (error) {
+            toast.add({ title: 'Failed to search' })
             console.error(error);
         } finally {
             setIsSearching(false)
@@ -59,18 +106,6 @@ export default function Page() {
         if (!isInitialRender) localStorage.setItem('search_history', JSON.stringify(searchHistory));
     }, [searchHistory]);
 
-    useEffect(() => {
-        if (!isInitialRender) {
-            if (query.trim().length === 0) {
-                setIsSearched(false);
-                setIsSearching(false);
-                return;
-            } else {
-                setIsSearched(true);
-                setIsSearching(true);
-            }
-        }
-    }, [query]);
 
 
     return (
@@ -97,18 +132,22 @@ export default function Page() {
                         }}
                         onChange={event => setQuery(event.target.value)}
                         placeholder="Search for Post..."
-                        className="outline-none bg-transparent w-full text-sm sm:text-base"
+                        className="outline-none bg-transparent w-full text-sm sm:text-base disabled:opacity-50"
+                        disabled={isSearching}
                     />
                 </div>
-                <button type="submit" className="rounded-md h-10 px-3 text-white bg-[#1c4095] disabled:opacity-50 transition-colors cursor-pointer" >Search</button>
+                <button
+                    disabled={isSearching}
+                    type="submit"
+                    className="rounded-md h-10 px-3 text-white bg-[#1c4095] transition-colors cursor-pointer disabled:opacity-50"
+                >Search</button>
             </form>
             {
                 !isSearched
-                && !isSearching
                 && searchHistory.map(
                     (data, index) =>
                         <div key={index} className=" w-lg max-sm:w-sm flex flex-row justify-between items-center px-3 py-3 text-left ">
-                            <span className='text-sm text-gray-600'>
+                            <span className='text-sm text-gray-600' onClick={() => setQuery(data)}>
                                 {data}
                             </span>
                             <button
@@ -123,94 +162,78 @@ export default function Page() {
 
 
             {
-                isSearched && isSearching &&
+                isSearched &&
                 <div className="flex flex-col py-4 w-full max-w-lg">
-                    <Tabs defaultValue={'All'} >
+                    <Tabs value={tabValue} >
                         <TabsList>
-                            <TabsTrigger value={'All'}>All</TabsTrigger>
-                            <TabsTrigger value={'Friends'}>Friends</TabsTrigger>
-                            <TabsTrigger value={'Post'}>Post</TabsTrigger>
+                            <TabsTrigger onClick={() => setTabValue('All')} value={'All'}>All</TabsTrigger>
+                            <TabsTrigger onClick={() => setTabValue('Friends')} value={'Friends'}>Friends</TabsTrigger>
+                            <TabsTrigger onClick={() => setTabValue('Posts')} value={'Posts'}>Post</TabsTrigger>
                         </TabsList>
                         <TabsContent value={'All'} className={'w-sm md:w-md lg:w-lg xl:w-xl flex flex-col justify-start items-start gap-y-3'}>
-                            <h3 className='text-lg text-left font-semibold py-2 px-3 bg-gray-100 rounded-lg inline'>Friends :</h3>
+                            <h3 className=' text-left font-semibold py-2 px-3 bg-gray-100 rounded-lg inline'>Friends :</h3>
                             <div className="flex flex-col w-full">
-                                <Friends
-                                    userImageSrc={'https://img.icons8.com/material-two-tone/24/user.png'}
-                                    userImageAlt='User Image'
-                                    userName='Muhammad Mubtasim Fuad'
-                                />
-                                <Friends
-                                    userImageSrc={'https://img.icons8.com/material-two-tone/24/user.png'}
-                                    userImageAlt='User Image'
-                                    userName='Muhammad Rakib Ahmed'
-                                />
-                                <Friends
-                                    userImageSrc={'https://img.icons8.com/material-two-tone/24/user.png'}
-                                    userImageAlt='User Image'
-                                    userName='Muhammad Sakil Ahmed'
-                                />
-                                <button className='px-5 py-3 text-[#1c4095] border-2 border-[#1c4095] font-semibold rounded-md w-full cursor-pointer'>Load More</button>
+                                    {friends.filter((el, index) => index < 3).map(f => 
+                                        <Friends
+                                            userName={f.name}
+                                            userImageSrc={f.avatar}
+                                            userId={f.id}
+                                            userImageAlt='User'
+                                        />
+                                    )}
+                                <button 
+                                 onClick={() => setTabValue('Friends')}
+                                className='px-5 py-3 text-[#1c4095] border-2 border-[#1c4095] font-semibold rounded-md w-full cursor-pointer'>Load More</button>
                             </div>
 
-                            <h3 className='text-lg text-left font-semibold py-2 px-3 bg-gray-100 rounded-lg inline'>Post :</h3>
+                            <h3 className='text-left font-semibold py-2 px-3 bg-gray-100 rounded-lg inline'>Post :</h3>
                             <div className="flex flex-col justify-start items-start w-full">
-                                {samplePosts.map((post) =>
+                                {posts.filter((el, index) => index < 3).map(p =>
                                     <Post
-                                        key={post.id}
-                                        id={post.id}
-                                        user={post.user}
-                                        images={post.images}
-                                        description={post.description}
-                                        likeCount={post.likeCount}
-                                        comments={post.comments}
-                                        onLike={({ id, liked }) =>
-                                            console.log(`Post ${id} liked:`, liked)
-                                        }
-                                        onComment={({ id, text }) =>
-                                            console.log(`New comment on ${id}:`, text)
-                                        }
-                                        onShare={({ id }) => console.log(`Post ${id} shared`)}
+                                        id={String(p.id)}
+                                        userAvatar={p.userImage}
+                                        userId={p.userId}
+                                        userName={p.userName}
+                                        description={p.caption}
+                                        comments={p.comments}
+                                        likeCount={p.likes.length}
+                                        initialLiked={!!p.likes.find((like) => like.userId === Number(userId))}
+                                        images={p.images}
+                                        onShare={() => {}}
+                                        onComment={() => {}}
                                     />
                                 )}
-                                <button className='px-5 py-3 text-[#1c4095] border-2 border-[#1c4095] font-semibold rounded-md w-full cursor-pointer'>Load More</button>
+                                <button 
+                                onClick={() => setTabValue('Posts')}
+                                className='px-5 py-3 text-[#1c4095] border-2 border-[#1c4095] font-semibold rounded-md w-full cursor-pointer'>Load More</button>
                             </div>
                         </TabsContent>
                         <TabsContent value={'Friends'} className={"flex flex-col w-full"}>
-                            <Friends
-                                userImageSrc={'https://img.icons8.com/material-two-tone/24/user.png'}
-                                userImageAlt='User Image'
-                                userName='Muhammad Mubtasim Fuad'
-                            />
-                            <Friends
-                                userImageSrc={'https://img.icons8.com/material-two-tone/24/user.png'}
-                                userImageAlt='User Image'
-                                userName='Muhammad Rakib Ahmed'
-                            />
-                            <Friends
-                                userImageSrc={'https://img.icons8.com/material-two-tone/24/user.png'}
-                                userImageAlt='User Image'
-                                userName='Muhammad Sakil Ahmed'
-                            />
+                                {friends.map(f =>
+                                    <Friends
+                                        userName={f.name}
+                                        userImageSrc={f.avatar}
+                                        userId={f.id}
+                                        userImageAlt='User'
+                                    />
+                                )}
                         </TabsContent>
-                        <TabsContent value={'Post'} className="flex flex-col justify-start items-start w-full">
-                            {samplePosts.map((post) =>
-                                <Post
-                                    key={post.id}
-                                    id={post.id}
-                                    user={post.user}
-                                    images={post.images}
-                                    description={post.description}
-                                    likeCount={post.likeCount}
-                                    comments={post.comments}
-                                    onLike={({ id, liked }) =>
-                                        console.log(`Post ${id} liked:`, liked)
-                                    }
-                                    onComment={({ id, text }) =>
-                                        console.log(`New comment on ${id}:`, text)
-                                    }
-                                    onShare={({ id }) => console.log(`Post ${id} shared`)}
-                                />
-                            )}
+                        <TabsContent value={'Posts'} className="flex flex-col justify-start items-start w-full">
+                             {posts.map(p =>
+                                    <Post
+                                        id={String(p.id)}
+                                        userAvatar={p.userImage}
+                                        userId={p.userId}
+                                        userName={p.userName}
+                                        description={p.caption}
+                                        comments={p.comments}
+                                        likeCount={p.likes.length}
+                                        initialLiked={!!p.likes.find((like) => like.userId === Number(userId))}
+                                        images={p.images}
+                                        onShare={() => {}}
+                                        onComment={() => {}}
+                                    />
+                                )}
                         </TabsContent>
                     </Tabs>
                 </div>

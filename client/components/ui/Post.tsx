@@ -331,6 +331,7 @@ export default function Post({
                 />
 
                 <button
+                    onClick={() => alert('this feature is under construction')}
                     type="submit"
                     className="border-none text-sm font-semibold text-white bg-[#1c4095] rounded-md px-3 py-2"
                 >
