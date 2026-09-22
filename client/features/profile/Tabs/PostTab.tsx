@@ -6,6 +6,7 @@ import { toast } from '@/components/shadcn/toast'
 import CreatePostDialog from '@/components/ui/CreatePostDialog'
 import Post from '@/components/ui/Post'
 import { samplePosts } from '@/data/samplePost'
+import { useUserDetailsStore } from '@/lib/userDetailsStore'
 import { useSearchParams } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 
@@ -20,11 +21,7 @@ interface IPost {
     caption: string,
     images: string[],
     id: number,
-    likes: {
-        userId: number,
-        time: Date,
-        userName: string;
-    }[],
+    likes: number[],
     comments: {
         userId: number,
         userName: string;
@@ -39,7 +36,7 @@ export default function PostTab({ isDefaultUserId, defaultUserImage, userId, use
     let [posts, setPosts] = useState<IPost[]>([]);
     let [currentUploadedPage, setCurrentUploadedPage] = useState<number>(isNaN(Number(searchParams.get('currentUploadedPage'))) ? 0 : Number(searchParams.get('currentPage')));
     let [totalPages, setTotalPages] = useState<number>(0);
-
+    let defaultUserId = useUserDetailsStore(state => state.id);
     // let [isInitialRender, setIsInitialRender] = useState<boolean>(true);
     useEffect(() => {
         async function loadPost() {
@@ -81,7 +78,7 @@ export default function PostTab({ isDefaultUserId, defaultUserImage, userId, use
                         description={post.caption}
                         likeCount={post.likes.length}
                         comments={post.comments}
-                       
+                        initialLiked={post.likes.includes(Number(defaultUserId))}
                         onComment={({ id, text }) =>
                             console.log(`New comment on ${id}:`, text)
                         }

@@ -12,11 +12,7 @@ interface IPost {
     caption: string,
     images: string[],
     id: number,
-    likes: {
-        userId: number,
-        time: Date,
-        userName: string;
-    }[],
+    likes:number[],
     comments: {
         userId: number,
         userName: string;
@@ -67,7 +63,7 @@ export default function LikesTab({ userId }: IProps) {
                         description={post.caption}
                         likeCount={post.likes.length}
                         comments={post.comments}
-                        initialLiked={!!post.likes.find(p => p.userId ==userId)}
+                        initialLiked={!!post.likes.find(p => p ==userId)}
                         onComment={() =>
                             console.log('')
                         }

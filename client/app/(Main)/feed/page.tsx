@@ -6,17 +6,13 @@ import Loader from '@/components/ui/Loader'
 import Post from '@/components/ui/Post'
 import { samplePosts } from '@/data/samplePost'
 import { useUserDetailsStore } from '@/lib/userDetailsStore'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 
 interface IPost {
     caption: string,
     images: string[],
     id: number,
-    likes: {
-        userId: number,
-        time: Date,
-        userName: string;
-    }[],
+    likes: number[],
     comments: {
         userId: number,
         userName: string;
@@ -34,6 +30,8 @@ export default function page() {
   let userId = useUserDetailsStore(state => state.id);
   let [posts, setPost] = useState<IPost[]>([]);
   let [loading, setLoading]= useState<boolean>(true);
+  let skeletonPostRef = useRef(null);
+
   useEffect(() => {
     async function LoadPost() {
       try {
@@ -80,13 +78,14 @@ export default function page() {
           description={post.caption}
           likeCount={post.likes.length}
           comments={post.comments}
-          initialLiked={!!post.likes.find(p => p.userId == Number(userId!))}
+          initialLiked={!!post.likes.find(p => p == Number(userId!))}
           onComment={({ id, text }) =>
             console.log(`New comment on ${id}:`, text)
           }
           onShare={({ id }) => console.log(`Post ${id} shared`)}
         />
       )}
+
     </div>
   )
 }

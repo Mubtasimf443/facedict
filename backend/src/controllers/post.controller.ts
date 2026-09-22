@@ -9,6 +9,7 @@ import { count } from "drizzle-orm";
 import z, { success } from "zod";
 import { redisClient } from "../config/radis";
 import { getInterestSuggestion } from "../utils/core/interestAndCategories";
+import fa from "zod/v4/locales/fa.js";
 
 export default class postController {
     static async getSearchResult(req: Request, res: Response) {
@@ -54,44 +55,19 @@ export default class postController {
     }
     static async getFeed(req: Request, res: Response): Promise<Response> {
         try {
-            let page = z.number().int().nonnegative().default(0).parse(Number(req.query.page || 0));
-            let postSession = await redisClient.get(`post_session:${req.user_id!}`);
-            if (!postSession) {
-                let userInfo = (await db
-                    .select({ 
-                        friends : usersTable.friends,
-                        following : usersTable.following,
-                        interest : usersTable.interest
-                    })
-                    .from(usersTable)
-                    .where(eq(usersTable.id, req.user_id!))
-                    .limit(1))[0];
-                if (!userInfo) {
-                    return res.status(400).json({ error: { message: 'No Account was found ' } })
-                }
-                let interest = [...new Set([...userInfo.interest!, ...getInterestSuggestion(userInfo.interest!)])];
+            let userInfo = (await db
+                .select({
+                    friends: usersTable.friends,
+                    following: usersTable.following,
+                    interest: usersTable.interest
+                })
+                .from(usersTable)
+                .where(eq(usersTable.id, req.user_id!))
+                .limit(1))[0];
+            if (!userInfo) return res.status(400).json({ error: { message: 'No Account was found ' }, data: null, success: false });
 
-                let posts = await db
-                    .select({
-                      id : postTables.id
-                    })
-                    .from(postTables)
-                    .where(
-                        and(
-                            or(
-                                sql`JSON_OVERLAPS(${postTables.interest}, ${JSON.stringify(interest)})`,
-                                inArray(postTables.author, [...new Set([...userInfo.following!, ...userInfo.friends!])]),
-                                sql`JSON_OVERLAPS(${postTables.likes}, ${JSON.stringify([new Set([...userInfo.following!, ...userInfo.friends!])])})`
-                            ),
-                            gt(postTables.createdAt, new Date(Date.now() - 7 * 24 * 60 * 60 * 1000))
-                        )
-                    )
-                    .orderBy(
-                        desc(postTables.createdAt)
-                    )
-                    .limit(1500);
-                
-            }
+            let interest = [...new Set([...userInfo.interest!, ...getInterestSuggestion(userInfo.interest!)])];
+
             let posts = await db
                 .select({
                     caption: postTables.caption,
@@ -104,13 +80,22 @@ export default class postController {
                     userImage: usersTable.avatar,
                 })
                 .from(postTables)
-                // .where(
-                //      inArray(postTables.author , JSON.parse())
-                // )
+                .where(
+                    and(
+                        or(
+                            sql`JSON_OVERLAPS(${postTables.interest}, ${JSON.stringify(interest)})`,
+                            inArray(postTables.author, [...new Set([...userInfo.following!, ...userInfo.friends!])]),
+                            sql`JSON_OVERLAPS(${postTables.likes}, ${JSON.stringify([new Set([...userInfo.following!, ...userInfo.friends!])])})`
+                        ),
+                        gt(postTables.createdAt, new Date(Date.now() - 15 * 24 * 60 * 60 * 1000))
+                    )
+                )
                 .orderBy(
                     desc(postTables.createdAt)
                 )
-            return res.status(200).json({ data: { posts: [] } })
+                .leftJoin(usersTable, eq(postTables.author, usersTable.id))
+                .limit(1500);
+            return res.status(200).json({ data: { posts }, success: true, error: null })
         } catch (error) {
             console.error(error);
             return res.status(500).json({ error, success: false, data: null })
