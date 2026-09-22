@@ -13,6 +13,8 @@ import { friendshipRequestTable, postTables, usersTable } from "./drizzle/schema
 import { profileRouter } from "./routes/profile.route";
 import { count, eq } from "drizzle-orm";
 import { friendsRouter } from "./routes/friendship.route";
+import { redisClient } from "./config/radis";
+import shuffleArray from "./utils/core/shuffleArray";
 
 const app = express();
 app.use(
@@ -22,8 +24,6 @@ app.use(
     credentials: true,
   })
 );
-// console.log(db.select({ i: usersTable.interest, n: usersTable.name }).from(usersTable).then(data => console.log(data)));
-// db.select({ interest: usersTable.interest }).from(usersTable).then(data => console.log(data));
 
 app.use(morgan('dev'));
 app.use(express.json());

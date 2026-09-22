@@ -72,7 +72,7 @@ export default class postController {
                 if (!userInfo) return res.status(400).json({ error: { message: 'No Account was found ' }, data: null, success: false });
                 let interest = [...new Set([...userInfo.interest!, ...getInterestSuggestion(userInfo.interest!)])];
 
-                let postIds = (await db
+                let postIds =(await db
                     .select({ id: postTables.id })
                     .from(postTables)
                     .where(
@@ -90,14 +90,15 @@ export default class postController {
                     )
                     .limit(1000))
                     .map(el => el.id);
-                postIds = shuffleArray(postIds);
-                await redisClient.set(`POST_SESSION:${req.user_id!}`, JSON.stringify(postIds), 'EX', 600);
+
+                await redisClient.set(`POST_SESSION:${req.user_id!}`, JSON.stringify( shuffleArray(postIds)), 'EX', 600);
 
                 return res.status(200).json({ data: { posts: [], isRefreashed: true }, success: true, error: null })
             }
             if (!!postSession) {
                 let page = z.number().int().min(0).default(0).parse(Number(req.query.page));
                 let postIds: number[] = JSON.parse(postSession);
+                 
                 let totalPages = Math.max(Math.round(postIds.length / 10), 1);
                 let currentPostIds = page <= totalPages ? postIds.slice(page * 10, page * 10 + 10) : postIds.slice((totalPages - 1) * 10, totalPages * 10)
                 let posts = await db
@@ -114,6 +115,9 @@ export default class postController {
                     .from(postTables)
                     .where(
                         inArray(postTables.id, currentPostIds)
+                    )
+                    .orderBy(
+                        desc(postTables.createdAt)
                     )
                     .leftJoin(usersTable, eq(postTables.author, usersTable.id));
                     
