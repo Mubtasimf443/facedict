@@ -25,11 +25,7 @@ interface IPost {
     id: number
     caption: string,
     images: string[],
-    likes: {
-        userId: number
-        time: Date
-        userName: string
-    }[],
+    likes:number[],
     comments: {
         userId: number,
         userName: string,
@@ -173,8 +169,9 @@ export default function Page() {
                         <TabsContent value={'All'} className={'w-sm md:w-md lg:w-lg xl:w-xl flex flex-col justify-start items-start gap-y-3'}>
                             <h3 className=' text-left font-semibold py-2 px-3 bg-gray-100 rounded-lg inline'>Friends :</h3>
                             <div className="flex flex-col w-full">
-                                    {friends.filter((el, index) => index < 3).map(f => 
+                                    {friends.filter((el, index) => index < 3).map((f, index) => 
                                         <Friends
+                                            key={index}
                                             userName={f.name}
                                             userImageSrc={f.avatar}
                                             userId={f.id}
@@ -188,8 +185,9 @@ export default function Page() {
 
                             <h3 className='text-left font-semibold py-2 px-3 bg-gray-100 rounded-lg inline'>Post :</h3>
                             <div className="flex flex-col justify-start items-start w-full">
-                                {posts.filter((el, index) => index < 3).map(p =>
+                                {posts.filter((el, index) => index < 3).map((p, index) =>
                                     <Post
+                                        key={index}
                                         id={String(p.id)}
                                         userAvatar={p.userImage}
                                         userId={p.userId}
@@ -197,7 +195,7 @@ export default function Page() {
                                         description={p.caption}
                                         comments={p.comments}
                                         likeCount={p.likes.length}
-                                        initialLiked={!!p.likes.find((like) => like.userId === Number(userId))}
+                                        initialLiked={!!p.likes.find((like) => like == Number(userId))}
                                         images={p.images}
                                         onShare={() => {}}
                                         onComment={() => {}}
@@ -209,8 +207,9 @@ export default function Page() {
                             </div>
                         </TabsContent>
                         <TabsContent value={'Friends'} className={"flex flex-col w-full"}>
-                                {friends.map(f =>
+                                {friends.map((f, index) =>
                                     <Friends
+                                        key={index}
                                         userName={f.name}
                                         userImageSrc={f.avatar}
                                         userId={f.id}
@@ -219,8 +218,9 @@ export default function Page() {
                                 )}
                         </TabsContent>
                         <TabsContent value={'Posts'} className="flex flex-col justify-start items-start w-full">
-                             {posts.map(p =>
+                             {posts.map((p, index) =>
                                     <Post
+                                        key={index}
                                         id={String(p.id)}
                                         userAvatar={p.userImage}
                                         userId={p.userId}
@@ -228,7 +228,7 @@ export default function Page() {
                                         description={p.caption}
                                         comments={p.comments}
                                         likeCount={p.likes.length}
-                                        initialLiked={!!p.likes.find((like) => like.userId === Number(userId))}
+                                        initialLiked={!!p.likes.find((like) => like === Number(userId))}
                                         images={p.images}
                                         onShare={() => {}}
                                         onComment={() => {}}
