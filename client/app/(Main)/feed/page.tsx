@@ -4,6 +4,7 @@ import { toast } from '@/components/shadcn/toast'
 import CreatePostDialog from '@/components/ui/CreatePostDialog'
 import Loader from '@/components/ui/Loader'
 import Post from '@/components/ui/Post'
+import PostSkeleton from '@/components/ui/PostSkeleton'
 import { samplePosts } from '@/data/samplePost'
 import { useUserDetailsStore } from '@/lib/userDetailsStore'
 import React, { useEffect, useRef, useState } from 'react'
@@ -29,19 +30,43 @@ export default function page() {
   let avatar = useUserDetailsStore(state => state.avatar);
   let userId = useUserDetailsStore(state => state.id);
   let [posts, setPost] = useState<IPost[]>([]);
-  let [loading, setLoading]= useState<boolean>(true);
-  let skeletonPostRef = useRef(null);
+  let skeletonPostRef = useRef<HTMLElement>(null);
+  let [currentPage, setCurrentPage] = useState(0);
+  let [isInitialRender, setIsInitialRender] = useState(true);
+  let [totalPages, setTotalPages] = useState(1);
+  let [isRequesting, setIsRequesting] = useState(false);
+  useEffect(() => {
+    let observer= new IntersectionObserver(([element]) => {
+      if (element.isIntersecting && !isRequesting) {
+        if (currentPage < totalPages) setCurrentPage(prev => prev + 1);
+      }
+    });
+
+    observer.observe(skeletonPostRef.current!);
+  }, []);
 
   useEffect(() => {
     async function LoadPost() {
       try {
-        let response = await fetch(process.env.NEXT_PUBLIC_SERVER_URL! + '/api/post/feed', {
+        
+        setIsRequesting(true)
+        let response = await fetch(process.env.NEXT_PUBLIC_SERVER_URL! + '/api/post/feed?page=' + currentPage, {
           cache: 'no-cache',
           credentials: 'include'
         });
+        setIsRequesting(false);
         if (response.status === 200) {
           let {data } = await response.json();
-          setPost(data.posts);
+          if (data.isRefreashed && isInitialRender) {
+            setIsInitialRender(false);
+            return LoadPost()
+          }
+          else if (data.isRefreashed && !isInitialRender) {
+            setCurrentPage(0);
+          } else {
+            setPost(prev => [...prev, ...data.posts]);
+            setTotalPages(data.totalPages);
+          }
         }
         if (response.status !== 200) {
           console.log(await response.json());
@@ -50,13 +75,17 @@ export default function page() {
        
       } catch (error) {
         console.error(error);
-        toast.add({ title: 'Failed to Load Post', description: 'Because of an unknown server error, we could not load the post' });
-      } finally {
-        setLoading(false);
+        toast.add(
+          {
+            title: 'Failed to Load Post',
+            description: 'Because of an unknown server error, we could not load the post'
+          }
+        );
       }
     };
-    LoadPost()
-  }, [])
+    LoadPost();
+  }, [currentPage]);
+
   return (
     <div className='w-full flex flex-col justify-start items-center'>
       <CreatePostDialog
@@ -65,11 +94,9 @@ export default function page() {
         imageHeight={33}
         userId={Number(userId)}
       />
-      {loading && <Loader />}
-      {loading === false && posts.length === 0 && <p className=' text-red-700 text-xs'>There is no Post</p>}
-      {posts.map(post =>
+      {posts.map((post, key) =>
         <Post
-          key={post.id}
+          key={key}
           id={String(post.id)}
           userAvatar={post.userImage || 'https://placehold.co/400x400/cccccc/cccccc'}
           userId={post.userId}
@@ -85,7 +112,7 @@ export default function page() {
           onShare={({ id }) => console.log(`Post ${id} shared`)}
         />
       )}
-
+      <PostSkeleton ref={skeletonPostRef} />
     </div>
   )
 }

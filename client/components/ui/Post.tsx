@@ -5,11 +5,12 @@
 import { Heart, MessageCircle, Send, MoreHorizontal, Trash } from 'lucide-react'
 import Image from 'next/image'
 import React, { useEffect, useRef, useState } from 'react'
-import { Avatar, AvatarImage } from '@/components/shadcn/avatar'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/shadcn/avatar'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../shadcn/dropdown-menu'
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '../shadcn/carousel'
 import { Card, CardContent } from '../shadcn/card'
 import { toast } from '../shadcn/toast'
+import { useRouter } from 'next/navigation'
 
 type User = {
     name: string
@@ -40,6 +41,7 @@ type PostProps = {
 
 export default function Post({
     id,
+    userId,
     userName,
     userAvatar,
     images,
@@ -56,7 +58,7 @@ export default function Post({
     const [showComments, setShowComments] = useState(false)
     const [commentText, setCommentText] = useState('')
     const [localComments, setLocalComments] = useState<Comment[]>(comments)
-
+    const router = useRouter();
     async function onLike() {
         try {
             let response = await fetch(process.env.NEXT_PUBLIC_SERVER_URL! + `/api/post/like/${id}`, {
@@ -187,8 +189,9 @@ export default function Post({
             {/* Header: user image + name */}
             <div className="flex flex-row items-center justify-between px-4 pt-2">
                 <div className="flex flex-row items-center gap-3">
-                    <Avatar className="h-9 w-9 shrink-0">
+                    <Avatar onClick={() => router.push('/profile/' + userId)} className="h-9 w-9 shrink-0 cursor-pointer">
                         <AvatarImage src={userAvatar} alt={userName} />
+                        <AvatarFallback >{userName.split(' ').filter((el, index) => index < 2).map(el => el[0].toUpperCase()).join('')}</AvatarFallback>
                     </Avatar>
                     <span className="text-sm font-semibold text-gray-900">{userName}</span>
                 </div>

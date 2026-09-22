@@ -10,6 +10,7 @@ import z, { success } from "zod";
 import { redisClient } from "../config/radis";
 import { getInterestSuggestion } from "../utils/core/interestAndCategories";
 import fa from "zod/v4/locales/fa.js";
+import shuffleArray from "../utils/core/shuffleArray";
 
 export default class postController {
     static async getSearchResult(req: Request, res: Response) {
@@ -53,49 +54,74 @@ export default class postController {
             return res.status(500).json({ error, success: false, data: null })
         }
     }
-    static async getFeed(req: Request, res: Response): Promise<Response> {
+    static async getFeed(req: Request, res: Response){
         try {
-            let userInfo = (await db
-                .select({
-                    friends: usersTable.friends,
-                    following: usersTable.following,
-                    interest: usersTable.interest
-                })
-                .from(usersTable)
-                .where(eq(usersTable.id, req.user_id!))
-                .limit(1))[0];
-            if (!userInfo) return res.status(400).json({ error: { message: 'No Account was found ' }, data: null, success: false });
+            
+            let postSession = await redisClient.get(`POST_SESSION:${req.user_id!}`);
+            if (postSession === null) {
+                let userInfo = (await db
+                    .select({
+                        friends: usersTable.friends,
+                        following: usersTable.following,
+                        interest: usersTable.interest
+                    })
+                    .from(usersTable)
+                    .where(eq(usersTable.id, req.user_id!))
+                    .limit(1))[0];
+                
+                if (!userInfo) return res.status(400).json({ error: { message: 'No Account was found ' }, data: null, success: false });
+                let interest = [...new Set([...userInfo.interest!, ...getInterestSuggestion(userInfo.interest!)])];
 
-            let interest = [...new Set([...userInfo.interest!, ...getInterestSuggestion(userInfo.interest!)])];
-
-            let posts = await db
-                .select({
-                    caption: postTables.caption,
-                    images: postTables.images,
-                    id: postTables.id,
-                    likes: postTables.likes,
-                    comments: postTables.comments,
-                    userName: usersTable.name,
-                    userId: usersTable.id,
-                    userImage: usersTable.avatar,
-                })
-                .from(postTables)
-                .where(
-                    and(
-                        or(
-                            sql`JSON_OVERLAPS(${postTables.interest}, ${JSON.stringify(interest)})`,
-                            inArray(postTables.author, [...new Set([...userInfo.following!, ...userInfo.friends!])]),
-                            sql`JSON_OVERLAPS(${postTables.likes}, ${JSON.stringify([new Set([...userInfo.following!, ...userInfo.friends!])])})`
-                        ),
-                        gt(postTables.createdAt, new Date(Date.now() - 15 * 24 * 60 * 60 * 1000))
+                let postIds = (await db
+                    .select({ id: postTables.id })
+                    .from(postTables)
+                    .where(
+                        and(
+                            or(
+                                sql`JSON_OVERLAPS(${postTables.interest}, ${JSON.stringify(interest)})`,
+                                inArray(postTables.author, [...new Set([...userInfo.following!, ...userInfo.friends!])]),
+                                sql`JSON_OVERLAPS(${postTables.likes}, ${JSON.stringify([new Set([...userInfo.following!, ...userInfo.friends!])])})`
+                            ),
+                            gt(postTables.createdAt, new Date(Date.now() - 15 * 24 * 60 * 60 * 1000))
+                        )
                     )
-                )
-                .orderBy(
-                    desc(postTables.createdAt)
-                )
-                .leftJoin(usersTable, eq(postTables.author, usersTable.id))
-                .limit(1500);
-            return res.status(200).json({ data: { posts }, success: true, error: null })
+                    .orderBy(
+                        desc(postTables.createdAt)
+                    )
+                    .limit(1000))
+                    .map(el => el.id);
+                postIds = shuffleArray(postIds);
+                await redisClient.set(`POST_SESSION:${req.user_id!}`, JSON.stringify(postIds), 'EX', 600);
+
+                return res.status(200).json({ data: { posts: [], isRefreashed: true }, success: true, error: null })
+            }
+            if (!!postSession) {
+                let page = z.number().int().min(0).default(0).parse(Number(req.query.page));
+                let postIds: number[] = JSON.parse(postSession);
+                let totalPages = Math.max(Math.round(postIds.length / 10), 1);
+                let currentPostIds = page <= totalPages ? postIds.slice(page * 10, page * 10 + 10) : postIds.slice((totalPages - 1) * 10, totalPages * 10)
+                let posts = await db
+                    .select({
+                        caption: postTables.caption,
+                        images: postTables.images,
+                        id: postTables.id,
+                        likes: postTables.likes,
+                        comments: postTables.comments,
+                        userName: usersTable.name,
+                        userId: usersTable.id,
+                        userImage: usersTable.avatar,
+                    })
+                    .from(postTables)
+                    .where(
+                        inArray(postTables.id, currentPostIds)
+                    )
+                    .leftJoin(usersTable, eq(postTables.author, usersTable.id));
+                    
+                return res.status(200).json({ data: { posts, totalPages, isRefreashed: false }, success: true, error: null })
+            }
+
+           
+            
         } catch (error) {
             console.error(error);
             return res.status(500).json({ error, success: false, data: null })
@@ -194,7 +220,7 @@ export default class postController {
                 )
                 .from(postTables)
                 .where(
-                   sql`JSON_CONTAINS(${postTables.likes},${JSON.stringify(userId)})`
+                    sql`JSON_CONTAINS(${postTables.likes},${JSON.stringify(userId)})`
                 )
                 .leftJoin(usersTable, eq(postTables.author, usersTable.id))
                 .orderBy(
@@ -224,10 +250,32 @@ export default class postController {
             }
             let isLikedBefore = post.likes!.find((data) => data === userId);
             if (!isLikedBefore) {
+
                 await db
                     .update(postTables)
                     .set({ likes: [...(post.likes || []), req.user_id!] })
                     .where(eq(postTables.id, postId));
+
+                let userInterest = (await db.select().from(usersTable).where(eq(usersTable.id, userId)))[0].interest;
+
+                for (let i = 0; i < post.interest!.length; i++) {
+                    const interest = post.interest![i];
+                    if (userInterest!.includes(interest) === false) {
+                        if (userInterest?.length === 30) userInterest!.pop();
+                        userInterest = [interest, ...userInterest!]
+                    }
+                }
+
+                await db
+                    .update(usersTable)
+                    .set({
+                        interest: userInterest
+                    })
+                    .where(
+                        eq(usersTable.id, userId)
+                    )
+                    .limit(1);
+
                 return res.status(200).json({ success: true, isLiked: true });
             }
             await db

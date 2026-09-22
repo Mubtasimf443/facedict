@@ -23,7 +23,7 @@ app.use(
   })
 );
 // console.log(db.select({ i: usersTable.interest, n: usersTable.name }).from(usersTable).then(data => console.log(data)));
-// console.log(db.delete(postTables).then(data => console.log(data)));
+// db.select({ interest: usersTable.interest }).from(usersTable).then(data => console.log(data));
 
 app.use(morgan('dev'));
 app.use(express.json());
