@@ -22,8 +22,8 @@ app.use(
     credentials: true,
   })
 );
-// console.log(db.update(usersTable).set({ friends: [], following: [], followers: [] }).then(data => console.log(data)));
-// console.log(db.delete(friendshipRequestTable).then(data => console.log(data)));
+// console.log(db.select({ i: usersTable.interest, n: usersTable.name }).from(usersTable).then(data => console.log(data)));
+// console.log(db.delete(postTables).then(data => console.log(data)));
 
 app.use(morgan('dev'));
 app.use(express.json());

@@ -92,13 +92,7 @@ export const postTables = mysqlTable('postTable', {
             time : Date
         }[]>()
         .default([]),
-    likes: json('likes')
-        .$type<{
-                userId: number,
-                time: Date,
-                userName: string,
-            }[]>()
-        .default([]),
+    likes: json('likes').$type<number[]>().default([]),
     tags: json('tags').$type<string[]>().default([]),
     interest: json('interest').$type<string[]>().default([]),
     author: int('author').notNull().references(() => usersTable.id, { onDelete: 'cascade' })
